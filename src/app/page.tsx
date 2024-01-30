@@ -1,36 +1,34 @@
-import {
-  calculateBollingerBands,
-  identifyBollingerSignals,
-} from "../lib/bolinger";
-
-async function getHistory() {
-  let currentDate = new Date();
-  const fromDate = Math.round(
-    currentDate.setDate(currentDate.getDate() - 1) / 1000
-  );
-  const toDate = Math.floor(new Date().getTime() / 1000);
-  const api = `https://api.nobitex.ir/market/udf/history?symbol=BTCUSDT&resolution=60&from=${fromDate}&to=${toDate}`;
-  const data = fetch(api).then((res) => res.json());
-
-  return data;
-}
+import { symboles } from "@/const";
+import { getBollingerSignals } from "@/lib/bollinger";
+import { getSmaSignals } from "@/lib/sma";
+import { getMacdSignals } from "@/lib/macd";
+import ShowSignals from "@/components/showSignals";
+import { getRSISignals } from "@/lib/rsi";
 
 export default async function Home() {
-  const history = await getHistory().then((data) => {
-    return data;
-  });
-  const closes: number[] = history.c;
-  const period: number = 5;
-  const numStdDev: number = 2;
+  const bollingerSignals = await getBollingerSignals();
+  const macdSignals = await getMacdSignals();
+  const smaSignals = await getSmaSignals();
+  const rsiSignals = await getRSISignals();
 
-  const bollingerBands = calculateBollingerBands(closes, period, numStdDev);
-  const bollingerSignals = identifyBollingerSignals(closes, bollingerBands);
-
-  console.log("Bollinger Bands Signals:", bollingerSignals);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      {JSON.stringify(history.c)}
-      {JSON.stringify(bollingerSignals)}
+    <main className="grid grid-cols-4 gap-4">
+      <div>
+        <ShowSignals
+          title="Bollinger"
+          symboles={symboles}
+          signals={bollingerSignals}
+        />
+      </div>
+      <div>
+        <ShowSignals title="MACD" symboles={symboles} signals={macdSignals} />
+      </div>
+      <div>
+        <ShowSignals title="SMA" symboles={symboles} signals={smaSignals} />
+      </div>
+      <div>
+        <ShowSignals title="RSI" symboles={symboles} signals={rsiSignals} />
+      </div>
     </main>
   );
 }
