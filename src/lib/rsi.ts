@@ -1,14 +1,10 @@
 import {
   Signal,
-  periodSMA,
-  periodBB,
-  symboles,
   periodRSI,
   overboughtThreshold,
   oversoldThreshold,
 } from "@/const";
 import { calculateSMA } from "./sma";
-import { getHistory } from "@/api";
 
 export function calculateRSI(closePrices: number[], period: number): number[] {
   const changes: number[] = [];

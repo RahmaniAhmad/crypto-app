@@ -1,12 +1,5 @@
-import {
-  Signal,
-  periodBB,
-  periodSMA,
-  stdDevMultiplier,
-  symboles,
-} from "@/const";
+import { Signal, longPeriod, shortPeriod, stdDevMultiplier } from "@/const";
 import { calculateEMA } from "./ema";
-import { getHistory } from "@/api";
 
 export function calculateMACD(
   closePrices: number[],
@@ -32,7 +25,7 @@ export function generateMacdSignal(
   shortPeriod: number,
   longPeriod: number,
   signalPeriod: number
-): Signal {
+): any {
   const { macd, signalLine } = calculateMACD(
     closePrices,
     shortPeriod,
@@ -50,7 +43,7 @@ export function generateMacdSignal(
   } else if (currentMACD < currentSignalLine) {
     return Signal.Buy;
   } else {
-    return Signal.Hold;
+    return currentMACD + " , " + currentSignalLine; //Signal.Hold;
   }
 }
 export const getMacdSignals = async (histories: any[]) => {
@@ -59,8 +52,8 @@ export const getMacdSignals = async (histories: any[]) => {
     histories.forEach((history) => {
       const signal = generateMacdSignal(
         history.c,
-        periodSMA,
-        periodBB,
+        shortPeriod,
+        longPeriod,
         stdDevMultiplier
       );
       signals.push(signal);

@@ -1,5 +1,4 @@
-import { getHistory } from "@/api";
-import { Signal, periodSMA, symboles } from "@/const";
+import { Signal, periodSMA } from "@/const";
 
 export function calculateSMA(closePrices: number[], period: number): number[] {
   const smaValues: number[] = [];

@@ -1,23 +1,19 @@
+"use client";
 interface SMAProps {
   title?: string;
   symboles: string[];
   signals: string[];
 }
-export default async function ShowSignals({
-  title,
-  symboles,
-  signals,
-}: SMAProps) {
+export default function ShowSignals({ title, symboles, signals }: SMAProps) {
   const getColor = (signal: string) => {
     if (signal === "buy") return "green";
     if (signal === "sell") return "red";
 
-    return "black";
+    return "black dark:white";
   };
   return (
-    // <main className="flex min-h-screen flex-col items-start p-24">
     <div className="text-center">
-      <div className="font-bold sticky top-0 bg-blue-500 px-10">{title}</div>
+      <div className="sticky top-14 bg-blue-500 px-10 py-2">{title}</div>
       {signals.map((signal, index) => {
         return (
           <div

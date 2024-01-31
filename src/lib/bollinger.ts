@@ -1,6 +1,5 @@
-import { Signal, periodBB, periodSMA, symboles } from "@/const";
+import { Signal, periodBB, periodSMA } from "@/const";
 import { calculateSMA } from "./sma";
-import { getHistory } from "@/api";
 
 export function calculateBollingerBands(
   closePrices: number[],
