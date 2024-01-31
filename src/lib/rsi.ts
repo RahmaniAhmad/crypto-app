@@ -61,24 +61,21 @@ export function generateRSISignal(
   }
 }
 
-export const getRSISignals = async () => {
+export const getRSISignals = async (histories: any[]) => {
   const signals: string[] = [];
-
-  await getHistory(symboles)
-    .then((results) => {
-      results.map((result) => {
-        const signal = generateRSISignal(
-          result.c,
-          periodRSI,
-          overboughtThreshold,
-          oversoldThreshold
-        );
-        signals.push(signal);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
+  try {
+    histories.forEach((history) => {
+      const signal = generateRSISignal(
+        history.c,
+        periodRSI,
+        overboughtThreshold,
+        oversoldThreshold
+      );
+      signals.push(signal);
     });
+  } catch (error) {
+    console.error(error);
+  }
 
   return signals;
 };

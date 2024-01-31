@@ -4,15 +4,17 @@ import { getSmaSignals } from "@/lib/sma";
 import { getMacdSignals } from "@/lib/macd";
 import ShowSignals from "@/components/showSignals";
 import { getRSISignals } from "@/lib/rsi";
+import { getHistory } from "@/api";
 
 export default async function Home() {
-  const bollingerSignals = await getBollingerSignals();
-  const macdSignals = await getMacdSignals();
-  const smaSignals = await getSmaSignals();
-  const rsiSignals = await getRSISignals();
+  const histories = await getHistory(symboles);
+  const bollingerSignals = await getBollingerSignals(histories);
+  const macdSignals = await getMacdSignals(histories);
+  const smaSignals = await getSmaSignals(histories);
+  const rsiSignals = await getRSISignals(histories);
 
   return (
-    <main className="grid grid-cols-4 gap-4">
+    <main className="grid grid-cols-4">
       <div>
         <ShowSignals
           title="Bollinger"
@@ -20,9 +22,9 @@ export default async function Home() {
           signals={bollingerSignals}
         />
       </div>
-      <div>
+      {/* <div>
         <ShowSignals title="MACD" symboles={symboles} signals={macdSignals} />
-      </div>
+      </div> */}
       <div>
         <ShowSignals title="SMA" symboles={symboles} signals={smaSignals} />
       </div>

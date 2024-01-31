@@ -12,21 +12,23 @@ export default async function ShowSignals({
     if (signal === "buy") return "green";
     if (signal === "sell") return "red";
 
-    return "white";
+    return "black";
   };
   return (
-    <main className="flex min-h-screen flex-col items-center p-24">
-      <label>{title} </label>
-      <hr />
+    // <main className="flex min-h-screen flex-col items-start p-24">
+    <div className="text-center">
+      <div className="font-bold sticky top-0 bg-blue-500 px-10">{title}</div>
       {signals.map((signal, index) => {
         return (
-          <div key={index}>
-            <h1
-              style={{ color: getColor(signal) }}
-            >{`${symboles[index]}: ${signal}`}</h1>
+          <div
+            key={index}
+            style={{ color: getColor(signal) }}
+            className="flex space-x-3 w-full py-1 items-center justify-center"
+          >
+            {`${symboles[index]}: ${signal}`}
           </div>
         );
       })}
-    </main>
+    </div>
   );
 }

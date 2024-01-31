@@ -37,18 +37,16 @@ export function generateSmaSignal(
   }
 }
 
-export const getSmaSignals = async () => {
+export const getSmaSignals = async (histories: any[]) => {
   const signals: string[] = [];
-
-  await getHistory(symboles)
-    .then((results) => {
-      results.map((result) => {
-        const signal = generateSmaSignal(result.c, periodSMA);
-        signals.push(signal);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
+  try {
+    histories.forEach((history) => {
+      const signal = generateSmaSignal(history.c, periodSMA);
+      signals.push(signal);
     });
+  } catch (error) {
+    console.error(error);
+  }
+
   return signals;
 };

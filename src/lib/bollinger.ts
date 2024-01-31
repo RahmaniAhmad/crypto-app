@@ -56,19 +56,17 @@ export function generateBollingerSignal(
   }
 }
 
-export const getBollingerSignals = async () => {
+export const getBollingerSignals = async (histories: any[]) => {
   const signals: string[] = [];
 
-  await getHistory(symboles)
-    .then((results) => {
-      results.map((result) => {
-        const signal = generateBollingerSignal(result.c, periodSMA, periodBB);
-        signals.push(signal);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
+  try {
+    histories.forEach((history) => {
+      const signal = generateBollingerSignal(history.c, periodSMA, periodBB);
+      signals.push(signal);
     });
+  } catch (error) {
+    console.error(error);
+  }
 
   return signals;
 };

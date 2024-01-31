@@ -3,15 +3,22 @@ export enum Signal {
   Hold = "hold",
   Sell = "sell",
 }
+
+export const periodPoint = 30;
+export const resolution = 60;
+
 export const periodSMA = 720; //number of time units (e.g., days) , 7 days * 24 hours/day = 168 periods
 export const periodBB = 720; // the number of time units
 export const stdDevMultiplier = 2; //the number of standard deviations used to calculate the width of the Bollinger Bands
-export const shortPeriod = 360; //the shorter time period used to calculate the Exponential Moving Average
+
+export const shortPeriod = 1020; //the shorter time period used to calculate the Exponential Moving Average
 export const longPeriod = 720; //the longer time period used to calculate the Exponential Moving Average
-export const signalPeriod = 9; //the time period used to calculate the signal line
+export const signalPeriod = 540; //the time period used to calculate the signal line
+
 export const periodRSI = 14;
 export const overboughtThreshold = 70;
 export const oversoldThreshold = 30;
+
 export const symboles = [
   "btc",
   "eth",

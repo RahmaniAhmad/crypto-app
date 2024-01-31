@@ -53,23 +53,21 @@ export function generateMacdSignal(
     return Signal.Hold;
   }
 }
-export const getMacdSignals = async () => {
+export const getMacdSignals = async (histories: any[]) => {
   const signals: string[] = [];
-
-  await getHistory(symboles)
-    .then((results) => {
-      results.map((result) => {
-        const signal = generateMacdSignal(
-          result.c,
-          periodSMA,
-          periodBB,
-          stdDevMultiplier
-        );
-        signals.push(signal);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
+  try {
+    histories.forEach((history) => {
+      const signal = generateMacdSignal(
+        history.c,
+        periodSMA,
+        periodBB,
+        stdDevMultiplier
+      );
+      signals.push(signal);
     });
+  } catch (error) {
+    console.error(error);
+  }
+
   return signals;
 };
