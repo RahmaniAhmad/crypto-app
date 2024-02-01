@@ -2,7 +2,7 @@
 
 import { Input } from "@nextui-org/react";
 import ShowColumnData from "./showColumnData";
-import { symboles } from "@/const";
+import { cryptos } from "@/const";
 import { getBollingerSignals } from "@/lib/bollinger";
 import { getMacdSignals } from "@/lib/macd";
 import { getSmaSignals } from "@/lib/sma";
@@ -17,30 +17,32 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
   const [macdSignals, setMacdSignals] = useState<string[]>([]);
   const [smaSignals, setSmaSignals] = useState<string[]>([]);
   const [rsiSignals, setRsiSignals] = useState<string[]>([]);
-  const [searchSymbole, setSearchSymbole] = useState<string | undefined>();
+  const [searchCrypto, setSearchCrypto] = useState<string | undefined>();
   const [searchHistory, setSearchHistory] = useState<any[]>([]);
-  const [selectedSymbole, setSelectedSymbole] = useState<string | undefined>();
+  const [selectedCryptos, setSelectedCryptos] = useState<
+    string[] | undefined
+  >();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const bollingerSignals = await getBollingerSignals(
-          searchSymbole ? searchHistory : histories
+          searchCrypto ? searchHistory : histories
         );
         setBollingerSignals(bollingerSignals);
 
         const macdSignals = await getMacdSignals(
-          searchSymbole ? searchHistory : histories
+          searchCrypto ? searchHistory : histories
         );
         setMacdSignals(macdSignals);
 
         const smaSignals = await getSmaSignals(
-          searchSymbole ? searchHistory : histories
+          searchCrypto ? searchHistory : histories
         );
         setSmaSignals(smaSignals);
 
         const rsiSignals = await getRSISignals(
-          searchSymbole ? searchHistory : histories
+          searchCrypto ? searchHistory : histories
         );
         setRsiSignals(rsiSignals);
       } catch (error) {
@@ -48,32 +50,53 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
       }
     };
     fetchData();
-  }, [histories, searchSymbole, searchHistory]);
+  }, [histories, searchCrypto, searchHistory]);
+
+  const getIndexesStartingWithSearchValue = (
+    arr: string[],
+    targetChar: string
+  ): number[] => {
+    const indexes: number[] = [];
+
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].startsWith(targetChar)) {
+        indexes.push(i);
+      }
+    }
+
+    return indexes;
+  };
+
+  function getItemsByIndexes(arr: any[], indexes: number[]): any[] {
+    return indexes.map((index) => arr[index]);
+  }
 
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setSearchSymbole(value);
-    const indexOfItem = symboles.indexOf(value);
+    setSearchCrypto(value);
+    const indexes = getIndexesStartingWithSearchValue(cryptos, value);
 
-    if (indexOfItem > -1) {
-      setSelectedSymbole(value);
-      setSearchHistory([histories[indexOfItem]]);
+    if (indexes.length > 0) {
+      const searchHistories = getItemsByIndexes(histories, indexes);
+      const searchSymbols = getItemsByIndexes(cryptos, indexes);
+      setSelectedCryptos(searchSymbols);
+      setSearchHistory(searchHistories);
     } else {
-      setSelectedSymbole(undefined);
+      setSelectedCryptos(undefined);
+      setSearchHistory([]);
     }
   };
 
   const handleClearSearch = () => {
-    setSearchSymbole("");
-    setSelectedSymbole(undefined);
+    setSearchCrypto("");
+    setSelectedCryptos(undefined);
     setSearchHistory([]);
   };
-  const getCryptoName = (): string[] => {
-    if (selectedSymbole) return [selectedSymbole];
-    if (searchSymbole && !selectedSymbole) return [];
-    return symboles;
+  const getCryptos = () => {
+    if (selectedCryptos) return selectedCryptos;
+    if (searchCrypto) return [];
+    return cryptos;
   };
-
   return (
     <div>
       <div className="py-2">
@@ -81,14 +104,14 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
           isClearable
           placeholder="Search..."
           name="filter"
-          value={searchSymbole}
+          value={searchCrypto}
           onChange={handleSearch}
           onClear={handleClearSearch}
         />
       </div>
       <div className="py-2 text-center">{reportDate}</div>
       <div className="grid grid-cols-5">
-        <ShowColumnData title="Name" data={getCryptoName()} />
+        <ShowColumnData title="Name" data={getCryptos()} />
         <ShowColumnData title="Bollinger" data={bollingerSignals} />
         <ShowColumnData title="MACD" data={macdSignals} />
         <ShowColumnData title="SMA" data={smaSignals} />

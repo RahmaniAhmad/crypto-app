@@ -5,10 +5,11 @@ interface ShowColumnDataProps {
 }
 export default function ShowColumnData({ title, data }: ShowColumnDataProps) {
   const getColor = (signal: string) => {
-    if (signal === "buy") return "green";
-    if (signal === "sell") return "red";
+    if (signal === "buy") return "text-green-600 dark:text-green-400";
+    if (signal === "sell") return "text-red-600 dark:text-red-400";
+    if (signal === "hold") return "text-black dark:text-white";
 
-    return "black dark:white";
+    return "white";
   };
   return (
     <div className="text-center">
@@ -17,8 +18,9 @@ export default function ShowColumnData({ title, data }: ShowColumnDataProps) {
         return (
           <div
             key={index}
-            style={{ color: getColor(item) }}
-            className="flex space-x-3 w-full py-1 items-center justify-center"
+            className={`flex space-x-3 w-full py-1 items-center justify-center ${getColor(
+              item
+            )}`}
           >
             {item}
           </div>

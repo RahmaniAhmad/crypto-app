@@ -23,7 +23,7 @@ export const periodRSI = 14;
 export const overboughtThreshold = 70;
 export const oversoldThreshold = 30;
 
-export const symboles = [
+export const cryptos = [
   "btc",
   "eth",
   "etc",
