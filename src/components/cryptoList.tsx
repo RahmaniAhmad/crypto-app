@@ -74,7 +74,10 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
   const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setSearchCrypto(value);
-    const indexes = getIndexesStartingWithSearchValue(cryptos, value);
+    const indexes = getIndexesStartingWithSearchValue(
+      cryptos,
+      value.toUpperCase()
+    );
 
     if (indexes.length > 0) {
       const searchHistories = getItemsByIndexes(histories, indexes);

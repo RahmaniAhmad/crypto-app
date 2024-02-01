@@ -1,13 +1,16 @@
 "use client";
+
+import { Signal } from "@/const";
+
 interface ShowColumnDataProps {
   title?: string;
   data: string[];
 }
 export default function ShowColumnData({ title, data }: ShowColumnDataProps) {
   const getColor = (signal: string) => {
-    if (signal === "buy") return "text-green-600 dark:text-green-400";
-    if (signal === "sell") return "text-red-600 dark:text-red-400";
-    if (signal === "hold") return "text-black dark:text-white";
+    if (signal === Signal.buy) return "text-green-600 dark:text-green-400";
+    if (signal === Signal.sell) return "text-red-600 dark:text-red-400";
+    if (signal === Signal.neutral) return "text-gray-500 dark:text-gray-500";
 
     return "white";
   };

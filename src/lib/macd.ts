@@ -12,7 +12,7 @@ export function calculateMACD(
 
   const macd: number[] = [];
   for (let i = 0; i < closePrices.length; i++) {
-    macd.push(shortEMA[i] - longEMA[i]);
+    macd.push(longEMA[i] - shortEMA[i]);
   }
 
   const signalLine = calculateEMA(macd, signalPeriod);
@@ -39,11 +39,11 @@ export function generateMacdSignal(
   const currentSignalLine = signalLine[lastIdx];
 
   if (currentMACD > currentSignalLine) {
-    return Signal.Sell;
+    return Signal.sell;
   } else if (currentMACD < currentSignalLine) {
-    return Signal.Buy;
+    return Signal.buy;
   } else {
-    return currentMACD + " , " + currentSignalLine; //Signal.Hold;
+    return Signal.neutral;
   }
 }
 export const getMacdSignals = async (histories: any[]) => {

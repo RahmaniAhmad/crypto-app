@@ -47,11 +47,11 @@ export function generateBollingerSignal(
   const currentLowerBB = lower[lastIdx];
 
   if (currentClose > currentUpperBB) {
-    return Signal.Sell;
+    return Signal.sell;
   } else if (currentClose < currentLowerBB) {
-    return Signal.Buy;
+    return Signal.buy;
   } else {
-    return Signal.Hold;
+    return Signal.neutral;
   }
 }
 

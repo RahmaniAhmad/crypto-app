@@ -28,11 +28,11 @@ export function generateSmaSignal(
   const currentSMA = smaValues[lastIdx];
 
   if (currentClose > currentSMA) {
-    return Signal.Sell;
+    return Signal.sell;
   } else if (currentClose < currentSMA) {
-    return Signal.Buy;
+    return Signal.buy;
   } else {
-    return Signal.Hold;
+    return Signal.neutral;
   }
 }
 
