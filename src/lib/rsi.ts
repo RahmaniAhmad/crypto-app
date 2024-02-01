@@ -49,11 +49,11 @@ export function generateRSISignal(
   const currentRSI = rsiValues[lastIdx];
 
   if (currentRSI > overboughtThreshold) {
-    return Signal.Sell;
+    return Signal.sell;
   } else if (currentRSI < oversoldThreshold) {
-    return Signal.Buy;
+    return Signal.buy;
   } else {
-    return Signal.Hold;
+    return Signal.neutral;
   }
 }
 
