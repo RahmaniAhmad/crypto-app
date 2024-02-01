@@ -4,10 +4,12 @@ import CryptoList from "@/components/cryptoList";
 
 export default async function Home() {
   const histories = await getHistory(symboles);
-
   return (
     <main className="p-4">
-      <CryptoList histories={histories} />
+      <CryptoList
+        histories={histories}
+        reportDate={new Date().toLocaleString()}
+      />
     </main>
   );
 }

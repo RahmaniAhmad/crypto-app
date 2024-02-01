@@ -1,4 +1,4 @@
-import { periodPoint, resolution } from "@/const";
+import { MarketType, periodPoint, resolution } from "@/const";
 
 async function get(symbol: string) {
   let currentDate = new Date();
@@ -6,7 +6,7 @@ async function get(symbol: string) {
     currentDate.setDate(currentDate.getDate() - periodPoint) / 1000
   );
   const toDate = Math.floor(new Date().getTime() / 1000);
-  const api = `https://api.nobitex.ir/market/udf/history?symbol=${symbol}usdt&resolution=${resolution}&from=${fromDate}&to=${toDate}`;
+  const api = `https://api.nobitex.ir/market/udf/history?symbol=${symbol}${MarketType.usdt}&resolution=${resolution}&from=${fromDate}&to=${toDate}`;
   const data = fetch(api).then((res) => res.json());
 
   return data;

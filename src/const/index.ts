@@ -4,6 +4,10 @@ export enum Signal {
   Sell = "sell",
 }
 
+export enum MarketType {
+  usdt = "usdt",
+  irt = "irt",
+}
 export const periodPoint = 30;
 export const resolution = 60; //60, 180, 240, 360, 720, D, 2D, 3D
 
@@ -80,7 +84,6 @@ export const symboles = [
   "api3",
   "one",
   "glm",
-  "pmn",
   "dao",
   "cvc",
   "nmr",
@@ -117,6 +120,4 @@ export const symboles = [
   "gal",
   "agix",
   "fet",
-  "ilv",
-  "xtz",
 ];
