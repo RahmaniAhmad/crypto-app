@@ -3,6 +3,7 @@ import { getHistory } from "@/api";
 import CryptoList from "@/components/cryptoList";
 
 export default async function Home() {
+  //test
   const histories = await getHistory(cryptos);
   return (
     <main className="p-4">
