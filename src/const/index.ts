@@ -8,18 +8,18 @@ export enum MarketType {
   usdt = "USDT",
   irt = "IRT",
 }
-export const periodPoint = 30;
-export const resolution = "D"; //60, 180, 240, 360, 720, D, 2D, 3D
+export const periodPoint = 180;
+export const resolution = 240; //60, 180, 240, 360, 720, D, 2D, 3D
 
-export const periodSMA = 720; //number of time units (e.g., days) , 7 days * 24 hours/day = 168 periods
-export const periodBB = 720; // the number of time units
+export const periodSMA = 180; //number of time units (e.g., days) , 30 days * 24 hours/4 = 180 periods
+export const periodBB = 180; // the number of time units
 export const stdDevMultiplier = 2; //the number of standard deviations used to calculate the width of the Bollinger Bands
 
 export const shortPeriod = 12; //the shorter time period used to calculate the Exponential Moving Average
 export const longPeriod = 26; //the longer time period used to calculate the Exponential Moving Average
 export const signalPeriod = 9; //the time period used to calculate the signal line
 
-export const periodRSI = 14;
+export const periodRSI = 120; // 120 4-hour candles in 30 days
 export const overboughtThreshold = 70;
 export const oversoldThreshold = 30;
 

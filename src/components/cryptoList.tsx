@@ -8,6 +8,11 @@ import { getMacdSignals } from "@/lib/macd";
 import { getSmaSignals } from "@/lib/sma";
 import { getRSISignals } from "@/lib/rsi";
 import { useEffect, useState } from "react";
+import ShowColumnBreakoutData from "./showColumnBreakoutData";
+import {
+  getReistanceBreakouts,
+  getSupportBreakouts,
+} from "@/lib/supportResistanceBreakouts";
 interface CryptoListProps {
   histories: any[];
   reportDate: string;
@@ -17,6 +22,8 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
   const [macdSignals, setMacdSignals] = useState<string[]>([]);
   const [smaSignals, setSmaSignals] = useState<string[]>([]);
   const [rsiSignals, setRsiSignals] = useState<string[]>([]);
+  const [supportBreakouts, setSupportBreakouts] = useState<any[]>([]);
+  const [resistanceBreakouts, setResistanceBreakouts] = useState<any[]>([]);
   const [searchCrypto, setSearchCrypto] = useState<string | undefined>();
   const [searchHistory, setSearchHistory] = useState<any[]>([]);
   const [selectedCryptos, setSelectedCryptos] = useState<
@@ -45,6 +52,16 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
           searchCrypto ? searchHistory : histories
         );
         setRsiSignals(rsiSignals);
+
+        const supportBreakouts = await getSupportBreakouts(
+          searchCrypto ? searchHistory : histories
+        );
+        setSupportBreakouts(supportBreakouts);
+
+        const resistanceBreakouts = await getReistanceBreakouts(
+          searchCrypto ? searchHistory : histories
+        );
+        setResistanceBreakouts(resistanceBreakouts);
       } catch (error) {
         console.error(error);
       }
@@ -100,6 +117,7 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
     if (searchCrypto) return [];
     return cryptos;
   };
+
   return (
     <div>
       <div className="py-2">
@@ -113,12 +131,14 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
         />
       </div>
       <div className="py-2 text-center">{reportDate}</div>
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-7">
         <ShowColumnData title="Name" data={getCryptos()} />
         <ShowColumnData title="Bollinger" data={bollingerSignals} />
         <ShowColumnData title="MACD" data={macdSignals} />
         <ShowColumnData title="SMA" data={smaSignals} />
         <ShowColumnData title="RSI" data={rsiSignals} />
+        <ShowColumnBreakoutData title="SUPPORT" data={supportBreakouts} />
+        <ShowColumnBreakoutData title="RESISTANCE" data={resistanceBreakouts} />
       </div>
     </div>
   );
