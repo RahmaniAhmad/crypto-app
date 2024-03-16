@@ -9,7 +9,7 @@ export default function ShowColumnBreakoutData({
   data,
 }: ShowColumnBreakoutDataProps) {
   const getColor = (type: any) => {
-    if (type === "SUPPORT") return "text-green-600 dark:text-green-400";
+    if (type === "SUPPORT") return "text-blue-600 dark:text-blue-400";
     if (type === "RESISTANCE") return "text-red-600 dark:text-red-400";
     if (type === "NEUTRAL") return "text-gray-500 dark:text-gray-500";
 

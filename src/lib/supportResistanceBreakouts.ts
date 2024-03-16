@@ -8,6 +8,14 @@ function calculateTolerance(currentPrice: number, percentage: number): number {
   return (currentPrice * percentage) / 100;
 }
 
+function calculateSensitivity(
+  currentPrice: number,
+  sensitivityPercentage: number
+): number {
+  // Calculate sensitivity as a percentage of the current price
+  return (currentPrice * sensitivityPercentage) / 100;
+}
+
 function detectBreakout(
   currentPrice: number,
   levels: SupportResistanceLevel[]
@@ -92,10 +100,12 @@ function calculateSupportResistanceLevels(
 
 export const getSupportBreakouts = async (histories: any[]) => {
   const breakouts: SupportResistanceLevel[] = [];
+
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const levels = calculateSupportResistanceLevels(history.c, 3); // Support/resistance levels for the current cryptocurrency
+      const sensitivity = calculateSensitivity(currentPrice, 10);
+      const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const supportLevels = levels.filter((level) => level.type === "SUPPORT");
 
@@ -114,6 +124,7 @@ export const getReistanceBreakouts = async (histories: any[]) => {
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
+      const sensitivity = calculateSensitivity(currentPrice, 10);
       const levels = calculateSupportResistanceLevels(history.c, 3); // Support/resistance levels for the current cryptocurrency
 
       const resistanceLevels = levels.filter(
