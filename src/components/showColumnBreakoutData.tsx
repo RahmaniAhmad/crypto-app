@@ -28,7 +28,7 @@ export default function ShowColumnBreakoutData({
                 item.type
               )}`}
             >
-              {item.type}, {item.level}
+              {item.level}
             </div>
           </>
         );

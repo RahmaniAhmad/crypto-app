@@ -6,7 +6,7 @@ import {
 } from "@/const";
 import { calculateSMA } from "./sma";
 
-export function calculateRSI(closePrices: number[], period: number): number[] {
+export function calculateRSI(closePrices: number[], period: number): number {
   const changes: number[] = [];
   for (let i = 1; i < closePrices.length; i++) {
     changes.push(closePrices[i] - closePrices[i - 1]);
@@ -25,17 +25,13 @@ export function calculateRSI(closePrices: number[], period: number): number[] {
     }
   }
 
-  const avgGain = calculateSMA(gains, period);
-  const avgLoss = calculateSMA(losses, period);
+  const avgGain = calculateSMA(gains, gains.length);
+  const avgLoss = calculateSMA(losses, losses.length);
 
-  const rsiValues: number[] = [];
-  for (let i = period; i < closePrices.length; i++) {
-    const relativeStrength = avgGain[i - period] / avgLoss[i - period];
-    const rsi = 100 - 100 / (1 + relativeStrength);
-    rsiValues.push(rsi);
-  }
+  const relativeStrength = avgGain / avgLoss;
+  const rsi = 100 - 100 / (1 + relativeStrength);
 
-  return rsiValues;
+  return rsi;
 }
 
 export function generateRSISignal(
@@ -44,13 +40,12 @@ export function generateRSISignal(
   overboughtThreshold: number,
   oversoldThreshold: number
 ): Signal {
-  const rsiValues = calculateRSI(closePrices, periodRSI);
-  const lastIdx = rsiValues.length - 1;
-  const currentRSI = rsiValues[lastIdx];
-
-  if (currentRSI > overboughtThreshold) {
+  const rsi = calculateRSI(closePrices, periodRSI);
+  // const lastIdx = rsiValues.length - 1;
+  // const currentRSI = rsiValues[lastIdx];
+  if (rsi > overboughtThreshold) {
     return Signal.sell;
-  } else if (currentRSI < oversoldThreshold) {
+  } else if (rsi < oversoldThreshold) {
     return Signal.buy;
   } else {
     return Signal.neutral;

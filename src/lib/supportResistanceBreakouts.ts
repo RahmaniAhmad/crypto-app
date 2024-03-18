@@ -59,6 +59,29 @@ function detectNearestLevel(
   return nearestLevel;
 }
 
+function detectNearestSupportLevel(
+  currentPrice: number,
+  levels: SupportResistanceLevel[]
+): SupportResistanceLevel {
+  let nearestLevel: SupportResistanceLevel = { type: "NEUTRAL", level: 0 };
+  let minDistance = Number.MAX_VALUE;
+
+  for (const level of levels) {
+    const distance = Math.abs(level.level - currentPrice);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestLevel = level;
+    } else if (
+      distance === minDistance &&
+      level.level < currentPrice &&
+      level.level > nearestLevel.level
+    ) {
+      nearestLevel = level;
+    }
+  }
+
+  return nearestLevel;
+}
 function calculateSupportResistanceLevels(
   closePrices: number[],
   sensitivity: number
@@ -82,10 +105,10 @@ function calculateSupportResistanceLevels(
     // Check if there is a significant swing high or swing low
     if (lastHigh !== null && lastLow !== null) {
       const range = lastHigh - lastLow;
-      if (range >= sensitivity) {
+      if (range <= sensitivity) {
         // Significant swing high as resistance
         levels.push({ level: lastHigh, type: "RESISTANCE" });
-      } else if (range <= sensitivity) {
+      } else if (range >= sensitivity) {
         // Significant swing low as support
         levels.push({ level: lastLow, type: "SUPPORT" });
       }
@@ -104,7 +127,7 @@ export const getSupportBreakouts = async (histories: any[]) => {
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 10);
+      const sensitivity = calculateSensitivity(currentPrice, 2);
       const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const supportLevels = levels.filter((level) => level.type === "SUPPORT");
@@ -124,8 +147,8 @@ export const getReistanceBreakouts = async (histories: any[]) => {
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 10);
-      const levels = calculateSupportResistanceLevels(history.c, 3); // Support/resistance levels for the current cryptocurrency
+      const sensitivity = calculateSensitivity(currentPrice, 2);
+      const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const resistanceLevels = levels.filter(
         (level) => level.type === "RESISTANCE"

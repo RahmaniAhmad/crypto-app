@@ -1,4 +1,4 @@
-import { Signal, periodBB, periodSMA } from "@/const";
+import { Signal, periodBB, stdDevMultiplier } from "@/const";
 import { calculateSMA } from "./sma";
 
 export function calculateBollingerBands(
@@ -6,7 +6,7 @@ export function calculateBollingerBands(
   period: number,
   stdDevMultiplier: number
 ): { upper: number[]; lower: number[] } {
-  const smaValues = calculateSMA(closePrices, period);
+  const sma = calculateSMA(closePrices, period);
 
   const upperBands: number[] = [];
   const lowerBands: number[] = [];
@@ -17,7 +17,6 @@ export function calculateBollingerBands(
       lowerBands.push(1); // Not enough data for the initial period
     } else {
       const slice = closePrices.slice(i - period + 1, i + 1);
-      const sma = smaValues[i];
       const stdDev = Math.sqrt(
         slice.reduce((acc, val) => acc + Math.pow(val - sma, 2), 0) / period
       );
@@ -60,7 +59,11 @@ export const getBollingerSignals = async (histories: any[]) => {
 
   try {
     histories.forEach((history) => {
-      const signal = generateBollingerSignal(history.c, periodSMA, periodBB);
+      const signal = generateBollingerSignal(
+        history.c,
+        periodBB,
+        stdDevMultiplier
+      );
       signals.push(signal);
     });
   } catch (error) {

@@ -24,6 +24,7 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
   const [rsiSignals, setRsiSignals] = useState<string[]>([]);
   const [supportBreakouts, setSupportBreakouts] = useState<any[]>([]);
   const [resistanceBreakouts, setResistanceBreakouts] = useState<any[]>([]);
+  const [prices, setPrices] = useState<string[]>([]);
   const [searchCrypto, setSearchCrypto] = useState<string | undefined>();
   const [searchHistory, setSearchHistory] = useState<any[]>([]);
   const [selectedCryptos, setSelectedCryptos] = useState<
@@ -61,6 +62,19 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
         const resistanceBreakouts = await getReistanceBreakouts(
           searchCrypto ? searchHistory : histories
         );
+
+        const closePrices: string[] = [];
+        if (searchHistory.length > 0) {
+          searchHistory.map((item) => {
+            closePrices.push(item.c[item.c.length - 1]);
+          });
+        } else if (histories) {
+          histories.map((item) => {
+            closePrices.push(item.c[item.c.length - 1]);
+          });
+        }
+        setPrices(closePrices);
+
         setResistanceBreakouts(resistanceBreakouts);
       } catch (error) {
         console.error(error);
@@ -131,13 +145,14 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
         />
       </div>
       <div className="py-2 text-center">{reportDate}</div>
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-8">
         <ShowColumnData title="Name" data={getCryptos()} />
         <ShowColumnData title="Bollinger" data={bollingerSignals} />
         <ShowColumnData title="MACD" data={macdSignals} />
         <ShowColumnData title="SMA" data={smaSignals} />
         <ShowColumnData title="RSI" data={rsiSignals} />
         <ShowColumnBreakoutData title="SUPPORT" data={supportBreakouts} />
+        <ShowColumnData title="Price" data={prices} />
         <ShowColumnBreakoutData title="RESISTANCE" data={resistanceBreakouts} />
       </div>
     </div>
