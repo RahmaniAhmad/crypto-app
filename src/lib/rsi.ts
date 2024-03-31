@@ -7,10 +7,7 @@ import {
 import { calculateSMA } from "./sma";
 
 export function calculateRSI(closePrices: number[], period: number): number {
-  const prices = closePrices.slice(
-    closePrices.length - period,
-    closePrices.length
-  );
+  const prices = closePrices.slice(-period);
   const changes: number[] = [];
   for (let i = 1; i < prices.length; i++) {
     changes.push(prices[i] - prices[i - 1]);

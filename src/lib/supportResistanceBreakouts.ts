@@ -127,7 +127,7 @@ export const getSupportBreakouts = async (histories: any[]) => {
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 2);
+      const sensitivity = calculateSensitivity(currentPrice, 5);
       const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const supportLevels = levels.filter((level) => level.type === "SUPPORT");
@@ -147,7 +147,7 @@ export const getReistanceBreakouts = async (histories: any[]) => {
   try {
     histories.forEach((history) => {
       const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 2);
+      const sensitivity = calculateSensitivity(currentPrice, 5);
       const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const resistanceLevels = levels.filter(

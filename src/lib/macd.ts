@@ -1,47 +1,49 @@
-import { Signal, longPeriod, shortPeriod, stdDevMultiplier } from "@/const";
+import { Signal, longPeriod, shortPeriod, signalPeriod } from "@/const";
 import { calculateEMA } from "./ema";
 
-export function calculateMACD(
+function padArray(array: number[], length: number): number[] {
+  if (array.length >= length) {
+    return array;
+  }
+  const padding = Array(length - array.length).fill(0);
+  return padding.concat(array);
+}
+
+export const calculateMACD = (
   closePrices: number[],
   shortPeriod: number,
-  longPeriod: number,
-  signalPeriod: number
-): { macd: number[]; signalLine: number[] } {
-  const shortEMA = calculateEMA(closePrices, shortPeriod);
-  const longEMA = calculateEMA(closePrices, longPeriod);
+  longPeriod: number
+): { macdLine: number[] } => {
+  const shortEMAs = calculateEMA(closePrices, shortPeriod);
+  const longEMAs = calculateEMA(closePrices, longPeriod);
 
-  const macd: number[] = [];
-  for (let i = 0; i < closePrices.length; i++) {
-    macd.push(longEMA[i] - shortEMA[i]);
+  const alignedShortEMAs = padArray(shortEMAs, longPeriod);
+  const alignedLongEMAs = padArray(longEMAs, longPeriod);
+
+  const macdLine: number[] = [];
+  for (let i = shortPeriod; i < longPeriod; i++) {
+    macdLine.push(alignedShortEMAs[i] - alignedLongEMAs[i]);
   }
 
-  const signalLine = calculateEMA(macd, signalPeriod);
-
-  return { macd, signalLine };
-}
+  return { macdLine };
+};
 export function generateMacdSignal(
   closePrices: number[],
-
   shortPeriod: number,
   longPeriod: number,
   signalPeriod: number
 ): any {
-  const { macd, signalLine } = calculateMACD(
-    closePrices,
-    shortPeriod,
-    longPeriod,
-    signalPeriod
-  );
+  const { macdLine } = calculateMACD(closePrices, shortPeriod, longPeriod);
 
-  const lastIdx = closePrices.length - 1;
+  const signalLine = calculateEMA(macdLine, signalPeriod);
 
-  const currentMACD = macd[lastIdx];
-  const currentSignalLine = signalLine[lastIdx];
+  const latestMacd = macdLine[macdLine.length - 1];
+  const latestSignal = signalLine[signalLine.length - 1];
 
-  if (currentMACD > currentSignalLine) {
-    return Signal.sell;
-  } else if (currentMACD < currentSignalLine) {
+  if (latestMacd > latestSignal) {
     return Signal.buy;
+  } else if (latestMacd < latestSignal) {
+    return Signal.sell;
   } else {
     return Signal.neutral;
   }
@@ -54,7 +56,7 @@ export const getMacdSignals = async (histories: any[]) => {
         history.c,
         shortPeriod,
         longPeriod,
-        stdDevMultiplier
+        signalPeriod
       );
       signals.push(signal);
     });

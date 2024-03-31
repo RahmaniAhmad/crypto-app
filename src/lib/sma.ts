@@ -1,9 +1,7 @@
 import { Signal, shortPeriodSMA, longPeriodSMA } from "@/const";
 
-export function calculateSMA(closePrices: number[], period: number): number {
-  const sum = closePrices
-    .slice(closePrices.length - period, closePrices.length)
-    .reduce((acc, val) => acc + val, 0);
+export function calculateSMA(data: number[], period: number): number {
+  const sum = data.slice(-period).reduce((acc, val) => acc + val, 0);
   return sum / period;
 }
 

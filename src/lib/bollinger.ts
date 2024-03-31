@@ -5,7 +5,7 @@ export function calculateBollingerBands(
   closePrices: number[],
   period: number,
   stdDevMultiplier: number
-): { upper: number[]; lower: number[] } {
+): { upper: number[]; lower: number[]; middle: number } {
   const sma = calculateSMA(closePrices, period);
 
   const upperBands: number[] = [];
@@ -18,15 +18,14 @@ export function calculateBollingerBands(
     } else {
       const slice = closePrices.slice(i - period + 1, i + 1);
       const stdDev = Math.sqrt(
-        slice.reduce((acc, val) => acc + Math.pow(val - sma, 2), 0) / period
+        slice.reduce((acc, val) => acc + Math.pow(val - sma, 2), 0) /
+          slice.length
       );
-
       upperBands.push(sma + stdDevMultiplier * stdDev);
       lowerBands.push(sma - stdDevMultiplier * stdDev);
     }
   }
-
-  return { upper: upperBands, lower: lowerBands };
+  return { upper: upperBands, lower: lowerBands, middle: sma };
 }
 
 export function generateBollingerSignal(
@@ -34,7 +33,7 @@ export function generateBollingerSignal(
   periodBB: number,
   stdDevMultiplier: number
 ): Signal {
-  const { upper, lower } = calculateBollingerBands(
+  const { upper, lower, middle } = calculateBollingerBands(
     closePrices,
     periodBB,
     stdDevMultiplier
@@ -44,7 +43,7 @@ export function generateBollingerSignal(
   const currentClose = closePrices[lastIdx];
   const currentUpperBB = upper[lastIdx];
   const currentLowerBB = lower[lastIdx];
-
+  debugger;
   if (currentClose > currentUpperBB) {
     return Signal.sell;
   } else if (currentClose < currentLowerBB) {
