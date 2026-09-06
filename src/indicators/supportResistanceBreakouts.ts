@@ -10,7 +10,7 @@ function calculateTolerance(currentPrice: number, percentage: number): number {
 
 function calculateSensitivity(
   currentPrice: number,
-  sensitivityPercentage: number
+  sensitivityPercentage: number,
 ): number {
   // Calculate sensitivity as a percentage of the current price
   return (currentPrice * sensitivityPercentage) / 100;
@@ -18,7 +18,7 @@ function calculateSensitivity(
 
 function detectBreakout(
   currentPrice: number,
-  levels: SupportResistanceLevel[]
+  levels: SupportResistanceLevel[],
 ): SupportResistanceLevel {
   const tolerance = calculateTolerance(currentPrice, 5);
 
@@ -37,7 +37,7 @@ function detectBreakout(
 
 function detectNearestLevel(
   currentPrice: number,
-  levels: SupportResistanceLevel[]
+  levels: SupportResistanceLevel[],
 ): SupportResistanceLevel {
   let nearestLevel: SupportResistanceLevel = { type: "NEUTRAL", level: 0 };
   let minDistance = Number.MAX_VALUE;
@@ -61,7 +61,7 @@ function detectNearestLevel(
 
 function detectNearestSupportLevel(
   currentPrice: number,
-  levels: SupportResistanceLevel[]
+  levels: SupportResistanceLevel[],
 ): SupportResistanceLevel {
   let nearestLevel: SupportResistanceLevel = { type: "NEUTRAL", level: 0 };
   let minDistance = Number.MAX_VALUE;
@@ -84,7 +84,7 @@ function detectNearestSupportLevel(
 }
 function calculateSupportResistanceLevels(
   closePrices: number[],
-  sensitivity: number
+  sensitivity: number,
 ): SupportResistanceLevel[] {
   const levels: SupportResistanceLevel[] = [];
   let lastHigh: number | null = null;
@@ -151,12 +151,12 @@ export const getReistanceBreakouts = async (histories: any[]) => {
       const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
 
       const resistanceLevels = levels.filter(
-        (level) => level.type === "RESISTANCE"
+        (level) => level.type === "RESISTANCE",
       );
 
       const nearestResistance = detectNearestLevel(
         currentPrice,
-        resistanceLevels
+        resistanceLevels,
       );
 
       breakouts.push(nearestResistance);

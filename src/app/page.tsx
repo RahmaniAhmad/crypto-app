@@ -1,6 +1,6 @@
-import { cryptos } from "@/const";
 import { getHistory } from "@/api";
 import CryptoList from "@/components/cryptoList";
+import { cryptos } from "@/const/cryptos";
 
 export default async function Home() {
   const histories = await getHistory(cryptos);

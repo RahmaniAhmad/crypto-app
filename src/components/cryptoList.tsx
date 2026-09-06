@@ -2,17 +2,18 @@
 
 import { Input } from "@nextui-org/react";
 import ShowColumnData from "./showColumnData";
-import { cryptos } from "@/const";
-import { getBollingerSignals } from "@/lib/bollinger";
-import { getMacdSignals } from "@/lib/macd";
-import { getSmaSignals } from "@/lib/sma";
-import { getRSISignals } from "@/lib/rsi";
 import { useEffect, useState } from "react";
 import ShowColumnBreakoutData from "./showColumnBreakoutData";
+import { getBollingerSignals } from "@/indicators/bollinger";
+import { getMacdSignals } from "@/indicators/macd";
+import { getSmaSignals } from "@/indicators/sma";
+import { getRSISignals } from "@/indicators/rsi";
 import {
   getReistanceBreakouts,
   getSupportBreakouts,
-} from "@/lib/supportResistanceBreakouts";
+} from "@/indicators/supportResistanceBreakouts";
+import { cryptos } from "@/const/cryptos";
+
 interface CryptoListProps {
   histories: any[];
   reportDate: string;
@@ -35,32 +36,32 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
     const fetchData = async () => {
       try {
         const bollingerSignals = await getBollingerSignals(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
         setBollingerSignals(bollingerSignals);
 
         const macdSignals = await getMacdSignals(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
         setMacdSignals(macdSignals);
 
         const smaSignals = await getSmaSignals(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
         setSmaSignals(smaSignals);
 
         const rsiSignals = await getRSISignals(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
         setRsiSignals(rsiSignals);
 
         const supportBreakouts = await getSupportBreakouts(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
         setSupportBreakouts(supportBreakouts);
 
         const resistanceBreakouts = await getReistanceBreakouts(
-          searchCrypto ? searchHistory : histories
+          searchCrypto ? searchHistory : histories,
         );
 
         const closePrices: string[] = [];
@@ -85,7 +86,7 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
 
   const getIndexesStartingWithSearchValue = (
     arr: string[],
-    targetChar: string
+    targetChar: string,
   ): number[] => {
     const indexes: number[] = [];
 
@@ -107,7 +108,7 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
     setSearchCrypto(value);
     const indexes = getIndexesStartingWithSearchValue(
       cryptos,
-      value.toUpperCase()
+      value.toUpperCase(),
     );
 
     if (indexes.length > 0) {

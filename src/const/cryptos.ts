@@ -1,0 +1,18 @@
+export const cryptos = [
+  "BTC",
+  "ETH",
+  "ETC",
+  "DOGE",
+  "ADA",
+  "BCH",
+  "LTC",
+  "BNB",
+  "EOS",
+  "XLM",
+  "XRP",
+  "TRX",
+  "UNI",
+  "LINK",
+  "DOT",
+  "AAVE",
+];

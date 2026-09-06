@@ -1,23 +1,41 @@
-import { MarketType, periodPoint, resolution } from "@/const";
+import { mapToBinanceSymbols } from "../market";
+import { getBinanceSymbols } from "../market/binance/getSymbols";
 
-async function get(symbol: string) {
-  let currentDate = new Date();
-  const fromDate = Math.round(
-    currentDate.setDate(currentDate.getDate() - periodPoint) / 1000
+const BINANCE_FUTURES_API = "https://fapi.binance.com";
+
+async function get(binanceSymbol: string) {
+  const response = await fetch(
+    `${BINANCE_FUTURES_API}/fapi/v1/klines?symbol=${binanceSymbol}&interval=5m&limit=500`,
+    {
+      cache: "no-store",
+    },
   );
-  const toDate = Math.floor(new Date().getTime() / 1000);
-  const api = `https://api.nobitex.ir/market/udf/history?symbol=${symbol}${MarketType.usdt}&resolution=${resolution}&from=${fromDate}&to=${toDate}`;
-  const data = fetch(api).then((res) => res.json());
 
-  return data;
+  if (!response.ok) {
+    const body = await response.text();
+
+    console.error(
+      `Binance API failed for ${binanceSymbol}: ${response.status} ${body}`,
+    );
+
+    return {
+      symbol: binanceSymbol.replace("USDT", ""),
+      c: [],
+    };
+  }
+
+  const candles = await response.json();
+
+  return {
+    symbol: binanceSymbol.replace("USDT", ""),
+    c: candles.map((candle: any[]) => Number(candle[4])),
+  };
 }
+
 export async function getHistory(symbols: string[]) {
-  const historyPromises = symbols.map(async (symbol) => {
-    const history = await get(symbol);
-    return history;
-  });
+  const availableBinanceSymbols = await getBinanceSymbols();
 
-  const historyResults = await Promise.all(historyPromises);
+  const binanceSymbols = mapToBinanceSymbols(symbols, availableBinanceSymbols);
 
-  return historyResults;
+  return Promise.all(binanceSymbols.map((symbol) => get(symbol)));
 }
