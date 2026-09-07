@@ -1,5 +1,4 @@
-import { periodRSI, overboughtThreshold, oversoldThreshold } from "@/const";
-
+import { RSI_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
 
 export function calculateRSI(closePrices: number[], period: number): number {
@@ -30,13 +29,13 @@ export function generateRSISignal(
   symbol: string,
   closePrices: number[],
 ): IndicatorResult {
-  const rsi = calculateRSI(closePrices, periodRSI);
+  const rsi = calculateRSI(closePrices, RSI_CONFIG.period);
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  if (rsi < oversoldThreshold) signal = IndicatorSignal.BUY;
+  if (rsi < RSI_CONFIG.oversoldThreshold) signal = IndicatorSignal.BUY;
 
-  if (rsi > overboughtThreshold) signal = IndicatorSignal.SELL;
+  if (rsi > RSI_CONFIG.overboughtThreshold) signal = IndicatorSignal.SELL;
 
   return {
     symbol,
