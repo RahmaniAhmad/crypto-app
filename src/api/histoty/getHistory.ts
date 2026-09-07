@@ -1,4 +1,4 @@
-import { candleLimit, resolution } from "@/const";
+import { TRADING_CONFIG } from "@/config";
 import { MarketHistory } from "../market/types";
 
 const BINANCE_FUTURES_API = "https://fapi.binance.com";
@@ -23,7 +23,7 @@ async function fetchWithTimeout(url: string, timeoutMs = 5000) {
 async function get(binanceSymbol: string): Promise<MarketHistory> {
   try {
     const response = await fetchWithTimeout(
-      `${BINANCE_FUTURES_API}/fapi/v1/klines?symbol=${binanceSymbol}&interval=${resolution}&limit=${candleLimit}`,
+      `${BINANCE_FUTURES_API}/fapi/v1/klines?symbol=${binanceSymbol}&interval=${TRADING_CONFIG.resolution}&limit=${TRADING_CONFIG.candleLimit}`,
     );
 
     if (!response.ok) {

@@ -1,7 +1,7 @@
-import { periodBB, stdDevMultiplier } from "@/const";
 import { IndicatorResult, IndicatorSignal } from "./types";
 
 import { calculateSMA } from "./sma";
+import { BOLLINGER_CONFIG } from "@/config";
 
 export function calculateBollingerBands(
   closePrices: number[],
@@ -49,8 +49,8 @@ export function generateBollingerSignal(
 ): IndicatorResult {
   const { upper, lower, middle } = calculateBollingerBands(
     closePrices,
-    periodBB,
-    stdDevMultiplier,
+    BOLLINGER_CONFIG.period,
+    BOLLINGER_CONFIG.stdDevMultiplier,
   );
 
   const lastIndex = closePrices.length - 1;

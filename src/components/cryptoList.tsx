@@ -4,8 +4,7 @@ import { Input } from "@nextui-org/react";
 import { useMemo, useState } from "react";
 
 import { IndicatorResult } from "@/indicators/types";
-import { Signal } from "@/const";
-import StateMessage from "./ui/StateMessage";
+import { Signal } from "@/types";
 
 interface CryptoAnalysis {
   symbol: string;
@@ -40,15 +39,15 @@ export default function CryptoList({ data }: CryptoListProps) {
   };
 
   const signalColor = (signal: string) => {
-    if (signal === Signal.buy) {
+    if (signal === Signal.BUY) {
       return "text-green-500 font-bold";
     }
 
-    if (signal === Signal.sell) {
+    if (signal === Signal.SELL) {
       return "text-red-500 font-bold";
     }
 
-    if (signal === Signal.neutral) {
+    if (signal === Signal.NEUTRAL) {
       return "text-gray-400 dark:text-gray-500";
     }
 

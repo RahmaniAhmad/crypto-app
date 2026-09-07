@@ -1,11 +1,11 @@
-import { shortPeriod, longPeriod, signalPeriod } from "@/const";
+import { MACD_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
 import { calculateEMA } from "./utils/ema";
 
 export function calculateMACD(closePrices: number[]) {
-  const shortEMA = calculateEMA(closePrices, shortPeriod);
+  const shortEMA = calculateEMA(closePrices, MACD_CONFIG.shortPeriod);
 
-  const longEMA = calculateEMA(closePrices, longPeriod);
+  const longEMA = calculateEMA(closePrices, MACD_CONFIG.longPeriod);
 
   if (shortEMA.length === 0 || longEMA.length === 0) {
     return {
@@ -14,7 +14,7 @@ export function calculateMACD(closePrices: number[]) {
     };
   }
 
-  const offset = longPeriod - shortPeriod;
+  const offset = MACD_CONFIG.longPeriod - MACD_CONFIG.shortPeriod;
 
   const macdLine: number[] = [];
 
@@ -26,7 +26,7 @@ export function calculateMACD(closePrices: number[]) {
     }
   }
 
-  const signalLine = calculateEMA(macdLine, signalPeriod);
+  const signalLine = calculateEMA(macdLine, MACD_CONFIG.signalPeriod);
 
   return {
     macdLine,

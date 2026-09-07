@@ -1,4 +1,4 @@
-import { shortPeriodSMA, longPeriodSMA } from "@/const";
+import { SMA_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
 
 export function calculateSMA(data: number[], period: number): number {
@@ -15,9 +15,9 @@ export function generateSmaSignal(
   symbol: string,
   closePrices: number[],
 ): IndicatorResult {
-  const short = calculateSMA(closePrices, shortPeriodSMA);
+  const short = calculateSMA(closePrices, SMA_CONFIG.shortPeriod);
 
-  const long = calculateSMA(closePrices, longPeriodSMA);
+  const long = calculateSMA(closePrices, SMA_CONFIG.longPeriod);
 
   if (Number.isNaN(short) || Number.isNaN(long)) {
     return {
