@@ -1,33 +1,53 @@
-import { Signal, shortPeriodSMA, longPeriodSMA } from "@/const";
+import { shortPeriodSMA, longPeriodSMA } from "@/const";
+import { IndicatorResult, IndicatorSignal } from "./types";
 
 export function calculateSMA(data: number[], period: number): number {
-  const sum = data.slice(-period).reduce((acc, val) => acc + val, 0);
-  return sum / period;
-}
-
-export function generateSmaSignal(closePrices: number[]): Signal {
-  const longSMA = calculateSMA(closePrices, longPeriodSMA);
-  const shortSMA = calculateSMA(closePrices, shortPeriodSMA);
-
-  if (longSMA > shortSMA) {
-    return Signal.sell;
-  } else if (longSMA < shortSMA) {
-    return Signal.buy;
-  } else {
-    return Signal.neutral;
-  }
-}
-
-export const getSmaSignals = async (histories: any[]) => {
-  const signals: string[] = [];
-  try {
-    histories.forEach((history) => {
-      const signal = generateSmaSignal(history.c);
-      signals.push(signal);
-    });
-  } catch (error) {
-    console.error(error);
+  if (data.length < period) {
+    return NaN;
   }
 
-  return signals;
-};
+  const values = data.slice(-period);
+
+  return values.reduce((sum, value) => sum + value, 0) / period;
+}
+
+export function generateSmaSignal(
+  symbol: string,
+  closePrices: number[],
+): IndicatorResult {
+  const short = calculateSMA(closePrices, shortPeriodSMA);
+
+  const long = calculateSMA(closePrices, longPeriodSMA);
+
+  if (Number.isNaN(short) || Number.isNaN(long)) {
+    return {
+      symbol,
+      indicator: "SMA",
+      signal: IndicatorSignal.NEUTRAL,
+      strength: 0,
+    };
+  }
+
+  let signal = IndicatorSignal.NEUTRAL;
+
+  if (short > long) {
+    signal = IndicatorSignal.BUY;
+  } else if (short < long) {
+    signal = IndicatorSignal.SELL;
+  }
+
+  const strength =
+    long === 0 ? 0 : Math.min((Math.abs(short - long) / long) * 100, 100);
+
+  return {
+    symbol,
+
+    indicator: "SMA",
+
+    signal,
+
+    strength,
+
+    value: short,
+  };
+}

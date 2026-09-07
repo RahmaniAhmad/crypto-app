@@ -1,68 +1,83 @@
-import { Signal, longPeriod, shortPeriod, signalPeriod } from "@/const";
-import { calculateEMA } from "./ema";
+import { shortPeriod, longPeriod, signalPeriod } from "@/const";
+import { IndicatorResult, IndicatorSignal } from "./types";
+import { calculateEMA } from "./utils/ema";
 
-function padArray(array: number[], length: number): number[] {
-  if (array.length >= length) {
-    return array;
+export function calculateMACD(closePrices: number[]) {
+  const shortEMA = calculateEMA(closePrices, shortPeriod);
+
+  const longEMA = calculateEMA(closePrices, longPeriod);
+
+  if (shortEMA.length === 0 || longEMA.length === 0) {
+    return {
+      macdLine: [],
+      signalLine: [],
+    };
   }
-  const padding = Array(length - array.length).fill(0);
-  return padding.concat(array);
-}
 
-export const calculateMACD = (
-  closePrices: number[],
-  shortPeriod: number,
-  longPeriod: number
-): { macdLine: number[] } => {
-  const shortEMAs = calculateEMA(closePrices, shortPeriod);
-  const longEMAs = calculateEMA(closePrices, longPeriod);
-
-  const alignedShortEMAs = padArray(shortEMAs, longPeriod);
-  const alignedLongEMAs = padArray(longEMAs, longPeriod);
+  const offset = longPeriod - shortPeriod;
 
   const macdLine: number[] = [];
-  for (let i = shortPeriod; i < longPeriod; i++) {
-    macdLine.push(alignedShortEMAs[i] - alignedLongEMAs[i]);
-  }
 
-  return { macdLine };
-};
-export function generateMacdSignal(
-  closePrices: number[],
-  shortPeriod: number,
-  longPeriod: number,
-  signalPeriod: number
-): any {
-  const { macdLine } = calculateMACD(closePrices, shortPeriod, longPeriod);
+  for (let i = 0; i < longEMA.length; i++) {
+    const shortValue = shortEMA[i + offset];
+
+    if (shortValue !== undefined) {
+      macdLine.push(shortValue - longEMA[i]);
+    }
+  }
 
   const signalLine = calculateEMA(macdLine, signalPeriod);
 
-  const latestMacd = macdLine[macdLine.length - 1];
+  return {
+    macdLine,
+    signalLine,
+  };
+}
+
+export function generateMacdSignal(
+  symbol: string,
+  closePrices: number[],
+): IndicatorResult {
+  const { macdLine, signalLine } = calculateMACD(closePrices);
+
+  if (macdLine.length === 0 || signalLine.length === 0) {
+    return {
+      symbol,
+      indicator: "MACD",
+      signal: IndicatorSignal.NEUTRAL,
+      strength: 0,
+    };
+  }
+
+  const latestMACD = macdLine[macdLine.length - 1];
+
   const latestSignal = signalLine[signalLine.length - 1];
 
-  if (latestMacd > latestSignal) {
-    return Signal.buy;
-  } else if (latestMacd < latestSignal) {
-    return Signal.sell;
-  } else {
-    return Signal.neutral;
-  }
-}
-export const getMacdSignals = async (histories: any[]) => {
-  const signals: string[] = [];
-  try {
-    histories.forEach((history) => {
-      const signal = generateMacdSignal(
-        history.c,
-        shortPeriod,
-        longPeriod,
-        signalPeriod
-      );
-      signals.push(signal);
-    });
-  } catch (error) {
-    console.error(error);
+  let signal = IndicatorSignal.NEUTRAL;
+
+  if (latestMACD > latestSignal) {
+    signal = IndicatorSignal.BUY;
+  } else if (latestMACD < latestSignal) {
+    signal = IndicatorSignal.SELL;
   }
 
-  return signals;
-};
+  const strength =
+    latestSignal === 0
+      ? 0
+      : Math.min(
+          (Math.abs(latestMACD - latestSignal) / Math.abs(latestSignal)) * 100,
+          100,
+        );
+
+  return {
+    symbol,
+
+    indicator: "MACD",
+
+    signal,
+
+    strength: Number.isFinite(strength) ? strength : 0,
+
+    value: latestMACD,
+  };
+}

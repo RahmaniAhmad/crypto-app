@@ -1,168 +1,273 @@
+import { MarketHistory } from "@/api/market/types";
+import { IndicatorResult, IndicatorSignal } from "./types";
+
+export type SupportResistanceType = "SUPPORT" | "RESISTANCE";
+
 export interface SupportResistanceLevel {
   level: number;
-  type: "SUPPORT" | "RESISTANCE" | "NEUTRAL";
+  type: SupportResistanceType;
+  touches: number;
 }
 
-function calculateTolerance(currentPrice: number, percentage: number): number {
-  // Calculate tolerance as a percentage of the current price
-  return (currentPrice * percentage) / 100;
+export type BreakoutType = "BREAKOUT_UP" | "BREAKOUT_DOWN" | "NONE";
+
+export interface BreakoutResult {
+  type: BreakoutType;
+  level?: SupportResistanceLevel;
 }
 
-function calculateSensitivity(
-  currentPrice: number,
-  sensitivityPercentage: number,
-): number {
-  // Calculate sensitivity as a percentage of the current price
-  return (currentPrice * sensitivityPercentage) / 100;
-}
+const LEVEL_TOLERANCE_PERCENT = 0.5;
+const BREAKOUT_CONFIRMATION_PERCENT = 0.5;
 
-function detectBreakout(
-  currentPrice: number,
-  levels: SupportResistanceLevel[],
-): SupportResistanceLevel {
-  const tolerance = calculateTolerance(currentPrice, 5);
-
-  for (const level of levels) {
-    if (level.type === "SUPPORT" && currentPrice < level.level - tolerance) {
-      return level;
-    } else if (
-      level.type === "RESISTANCE" &&
-      currentPrice > level.level + tolerance
-    ) {
-      return level;
-    }
-  }
-  return { type: "NEUTRAL", level: 0 };
-}
-
-function detectNearestLevel(
-  currentPrice: number,
-  levels: SupportResistanceLevel[],
-): SupportResistanceLevel {
-  let nearestLevel: SupportResistanceLevel = { type: "NEUTRAL", level: 0 };
-  let minDistance = Number.MAX_VALUE;
-
-  for (const level of levels) {
-    const distance = Math.abs(level.level - currentPrice);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestLevel = level;
-    } else if (
-      distance === minDistance &&
-      level.level < currentPrice &&
-      level.level > nearestLevel.level
-    ) {
-      nearestLevel = level;
-    }
-  }
-
-  return nearestLevel;
-}
-
-function detectNearestSupportLevel(
-  currentPrice: number,
-  levels: SupportResistanceLevel[],
-): SupportResistanceLevel {
-  let nearestLevel: SupportResistanceLevel = { type: "NEUTRAL", level: 0 };
-  let minDistance = Number.MAX_VALUE;
-
-  for (const level of levels) {
-    const distance = Math.abs(level.level - currentPrice);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestLevel = level;
-    } else if (
-      distance === minDistance &&
-      level.level < currentPrice &&
-      level.level > nearestLevel.level
-    ) {
-      nearestLevel = level;
-    }
-  }
-
-  return nearestLevel;
-}
-function calculateSupportResistanceLevels(
-  closePrices: number[],
-  sensitivity: number,
-): SupportResistanceLevel[] {
+/**
+ * Find local highs and lows
+ */
+function findSwingLevels(closePrices: number[]): SupportResistanceLevel[] {
   const levels: SupportResistanceLevel[] = [];
-  let lastHigh: number | null = null;
-  let lastLow: number | null = null;
-  for (let i = 1; i < closePrices.length - 1; i++) {
-    const prevPrice = closePrices[i - 1];
-    const currentPrice = closePrices[i];
-    const nextPrice = closePrices[i + 1];
 
-    if (currentPrice > prevPrice && currentPrice > nextPrice) {
-      // Local maximum (swing high)
-      lastHigh = currentPrice;
-    } else if (currentPrice < prevPrice && currentPrice < nextPrice) {
-      // Local minimum (swing low)
-      lastLow = currentPrice;
+  for (let i = 1; i < closePrices.length - 1; i++) {
+    const previous = closePrices[i - 1];
+    const current = closePrices[i];
+    const next = closePrices[i + 1];
+
+    if (!Number.isFinite(current)) {
+      continue;
     }
 
-    // Check if there is a significant swing high or swing low
-    if (lastHigh !== null && lastLow !== null) {
-      const range = lastHigh - lastLow;
-      if (range <= sensitivity) {
-        // Significant swing high as resistance
-        levels.push({ level: lastHigh, type: "RESISTANCE" });
-      } else if (range >= sensitivity) {
-        // Significant swing low as support
-        levels.push({ level: lastLow, type: "SUPPORT" });
-      }
-      // Reset last high and low
-      lastHigh = null;
-      lastLow = null;
+    if (current > previous && current > next) {
+      levels.push({
+        level: current,
+        type: "RESISTANCE",
+        touches: 1,
+      });
+    }
+
+    if (current < previous && current < next) {
+      levels.push({
+        level: current,
+        type: "SUPPORT",
+        touches: 1,
+      });
     }
   }
 
   return levels;
 }
 
-export const getSupportBreakouts = async (histories: any[]) => {
-  const breakouts: SupportResistanceLevel[] = [];
+/**
+ * Merge close levels into zones
+ */
+function mergeLevels(
+  levels: SupportResistanceLevel[],
+  tolerancePercent = LEVEL_TOLERANCE_PERCENT,
+): SupportResistanceLevel[] {
+  const merged: SupportResistanceLevel[] = [];
 
-  try {
-    histories.forEach((history) => {
-      const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 5);
-      const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
+  for (const level of levels) {
+    const existing = merged.find((item) => {
+      const difference = Math.abs(item.level - level.level);
 
-      const supportLevels = levels.filter((level) => level.type === "SUPPORT");
+      const percentage = (difference / item.level) * 100;
 
-      const nearestSupport = detectNearestLevel(currentPrice, supportLevels);
-
-      breakouts.push(nearestSupport);
+      return percentage <= tolerancePercent;
     });
-  } catch (error) {
-    console.error(error);
+
+    if (existing) {
+      existing.level = (existing.level + level.level) / 2;
+
+      existing.touches += 1;
+    } else {
+      merged.push({
+        ...level,
+      });
+    }
   }
-  return breakouts;
-};
 
-export const getReistanceBreakouts = async (histories: any[]) => {
-  const breakouts: SupportResistanceLevel[] = [];
-  try {
-    histories.forEach((history) => {
-      const currentPrice = history.c[history.c.length - 1]; // Current close price
-      const sensitivity = calculateSensitivity(currentPrice, 5);
-      const levels = calculateSupportResistanceLevels(history.c, sensitivity); // Support/resistance levels for the current cryptocurrency
+  return merged;
+}
 
-      const resistanceLevels = levels.filter(
-        (level) => level.type === "RESISTANCE",
-      );
+/**
+ * Calculate support/resistance zones
+ */
+function calculateSupportResistanceLevels(
+  closePrices: number[],
+): SupportResistanceLevel[] {
+  const swingLevels = findSwingLevels(closePrices);
 
-      const nearestResistance = detectNearestLevel(
-        currentPrice,
-        resistanceLevels,
-      );
+  return mergeLevels(swingLevels);
+}
 
-      breakouts.push(nearestResistance);
-    });
-  } catch (error) {
-    console.error(error);
+/**
+ * Find closest support below price
+ */
+function findNearestSupport(
+  currentPrice: number,
+  levels: SupportResistanceLevel[],
+): SupportResistanceLevel | undefined {
+  return levels
+    .filter((level) => level.type === "SUPPORT" && level.level < currentPrice)
+    .sort((a, b) => b.level - a.level)[0];
+}
+
+/**
+ * Find closest resistance above price
+ */
+function findNearestResistance(
+  currentPrice: number,
+  levels: SupportResistanceLevel[],
+): SupportResistanceLevel | undefined {
+  return levels
+    .filter(
+      (level) => level.type === "RESISTANCE" && level.level > currentPrice,
+    )
+    .sort((a, b) => a.level - b.level)[0];
+}
+
+/**
+ * Detect confirmed breakout
+ */
+function detectBreakout(
+  currentPrice: number,
+  levels: SupportResistanceLevel[],
+): BreakoutResult {
+  const resistance = findNearestResistance(currentPrice, levels);
+
+  const support = findNearestSupport(currentPrice, levels);
+
+  if (
+    resistance &&
+    currentPrice > resistance.level * (1 + BREAKOUT_CONFIRMATION_PERCENT / 100)
+  ) {
+    return {
+      type: "BREAKOUT_UP",
+      level: resistance,
+    };
   }
-  return breakouts;
-};
+
+  if (
+    support &&
+    currentPrice < support.level * (1 - BREAKOUT_CONFIRMATION_PERCENT / 100)
+  ) {
+    return {
+      type: "BREAKOUT_DOWN",
+      level: support,
+    };
+  }
+
+  return {
+    type: "NONE",
+  };
+}
+
+/**
+ * Get nearest support levels
+ */
+export function getSupportLevels(
+  histories: MarketHistory[],
+): SupportResistanceLevel[] {
+  return histories.map((history) => {
+    if (history.close.length === 0) {
+      return {
+        level: 0,
+        type: "SUPPORT",
+        touches: 0,
+      };
+    }
+
+    const currentPrice = history.close[history.close.length - 1];
+
+    const levels = calculateSupportResistanceLevels(history.close);
+
+    return (
+      findNearestSupport(currentPrice, levels) ?? {
+        level: 0,
+        type: "SUPPORT",
+        touches: 0,
+      }
+    );
+  });
+}
+
+/**
+ * Get nearest resistance levels
+ */
+export function getResistanceLevels(
+  histories: MarketHistory[],
+): SupportResistanceLevel[] {
+  return histories.map((history) => {
+    if (history.close.length === 0) {
+      return {
+        level: 0,
+        type: "RESISTANCE",
+        touches: 0,
+      };
+    }
+
+    const currentPrice = history.close[history.close.length - 1];
+
+    const levels = calculateSupportResistanceLevels(history.close);
+
+    return (
+      findNearestResistance(currentPrice, levels) ?? {
+        level: 0,
+        type: "RESISTANCE",
+        touches: 0,
+      }
+    );
+  });
+}
+
+/**
+ * Get breakout signals
+ */
+export function getBreakoutSignals(
+  histories: MarketHistory[],
+): BreakoutResult[] {
+  return histories.map((history) => {
+    if (history.close.length === 0) {
+      return {
+        type: "NONE",
+      };
+    }
+
+    const currentPrice = history.close[history.close.length - 1];
+
+    const levels = calculateSupportResistanceLevels(history.close);
+
+    return detectBreakout(currentPrice, levels);
+  });
+}
+
+export function generateSupportResistanceSignals(
+  symbol: string,
+  closePrices: number[],
+): IndicatorResult[] {
+  if (!closePrices.length) {
+    return [];
+  }
+
+  const currentPrice = closePrices[closePrices.length - 1];
+
+  const levels = calculateSupportResistanceLevels(closePrices);
+
+  const support = findNearestSupport(currentPrice, levels);
+
+  const resistance = findNearestResistance(currentPrice, levels);
+
+  return [
+    {
+      symbol,
+      indicator: "SUPPORT",
+      signal: IndicatorSignal.NEUTRAL,
+      strength: support?.touches ?? 0,
+      value: support?.level ?? 0,
+    },
+    {
+      symbol,
+      indicator: "RESISTANCE",
+      signal: IndicatorSignal.NEUTRAL,
+      strength: resistance?.touches ?? 0,
+      value: resistance?.level ?? 0,
+    },
+  ];
+}

@@ -1,41 +1,82 @@
 import { mapToBinanceSymbols } from "../market";
 import { getBinanceSymbols } from "../market/binance/getSymbols";
+import { MarketHistory } from "../market/types";
 
 const BINANCE_FUTURES_API = "https://fapi.binance.com";
 
-async function get(binanceSymbol: string) {
-  const response = await fetch(
-    `${BINANCE_FUTURES_API}/fapi/v1/klines?symbol=${binanceSymbol}&interval=5m&limit=500`,
-    {
+async function fetchWithTimeout(url: string, timeoutMs = 5000) {
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(url, {
       cache: "no-store",
-    },
-  );
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
-  if (!response.ok) {
-    const body = await response.text();
-
-    console.error(
-      `Binance API failed for ${binanceSymbol}: ${response.status} ${body}`,
+async function get(binanceSymbol: string): Promise<MarketHistory> {
+  try {
+    const response = await fetchWithTimeout(
+      `${BINANCE_FUTURES_API}/fapi/v1/klines?symbol=${binanceSymbol}&interval=5m&limit=500`,
     );
+
+    if (!response.ok) {
+      const body = await response.text();
+
+      console.error(
+        `Binance klines failed for ${binanceSymbol}: ${response.status} ${body}`,
+      );
+
+      return {
+        symbol: binanceSymbol.replace("USDT", ""),
+        close: [],
+      };
+    }
+
+    const candles = await response.json();
 
     return {
       symbol: binanceSymbol.replace("USDT", ""),
-      c: [],
+      close: candles.map((candle: any[]) => Number(candle[4])),
+    };
+  } catch (error) {
+    console.error(`Failed to fetch candles for ${binanceSymbol}:`, error);
+
+    return {
+      symbol: binanceSymbol.replace("USDT", ""),
+      close: [],
     };
   }
-
-  const candles = await response.json();
-
-  return {
-    symbol: binanceSymbol.replace("USDT", ""),
-    c: candles.map((candle: any[]) => Number(candle[4])),
-  };
 }
 
-export async function getHistory(symbols: string[]) {
-  const availableBinanceSymbols = await getBinanceSymbols();
+export async function getHistory(symbols: string[]): Promise<MarketHistory[]> {
+  let binanceSymbols: string[];
 
-  const binanceSymbols = mapToBinanceSymbols(symbols, availableBinanceSymbols);
+  try {
+    const availableBinanceSymbols = await getBinanceSymbols();
 
-  return Promise.all(binanceSymbols.map((symbol) => get(symbol)));
+    if (availableBinanceSymbols.length > 0) {
+      binanceSymbols = mapToBinanceSymbols(symbols, availableBinanceSymbols);
+    } else {
+      binanceSymbols = symbols.map((symbol) => `${symbol}USDT`);
+    }
+  } catch (error) {
+    console.error("Failed to validate Binance symbols:", error);
+
+    // fallback
+    binanceSymbols = symbols.map((symbol) => `${symbol}USDT`);
+  }
+
+  const histories = await Promise.all(
+    binanceSymbols.map((symbol) => get(symbol)),
+  );
+
+  return histories.filter((history) => history.close.length > 0);
 }

@@ -1,73 +1,89 @@
-import { Signal, periodBB, stdDevMultiplier } from "@/const";
+import { periodBB, stdDevMultiplier } from "@/const";
+import { IndicatorResult, IndicatorSignal } from "./types";
+
 import { calculateSMA } from "./sma";
 
 export function calculateBollingerBands(
   closePrices: number[],
   period: number,
-  stdDevMultiplier: number,
-): { upper: number[]; lower: number[]; middle: number } {
-  const sma = calculateSMA(closePrices, period);
-
-  const upperBands: number[] = [];
-  const lowerBands: number[] = [];
+  multiplier: number,
+) {
+  const upper: number[] = [];
+  const lower: number[] = [];
+  const middle: number[] = [];
 
   for (let i = 0; i < closePrices.length; i++) {
     if (i < period - 1) {
-      upperBands.push(1); // Not enough data for the initial period
-      lowerBands.push(1); // Not enough data for the initial period
-    } else {
-      const slice = closePrices.slice(i - period + 1, i + 1);
-      const stdDev = Math.sqrt(
-        slice.reduce((acc, val) => acc + Math.pow(val - sma, 2), 0) /
-          slice.length,
-      );
-      upperBands.push(sma + stdDevMultiplier * stdDev);
-      lowerBands.push(sma - stdDevMultiplier * stdDev);
+      middle.push(NaN);
+      upper.push(NaN);
+      lower.push(NaN);
+      continue;
     }
+
+    const slice = closePrices.slice(i - period + 1, i + 1);
+
+    const sma = calculateSMA(slice, period);
+
+    const variance =
+      slice.reduce((sum, price) => sum + Math.pow(price - sma, 2), 0) / period;
+
+    const stdDev = Math.sqrt(variance);
+
+    middle.push(sma);
+
+    upper.push(sma + multiplier * stdDev);
+
+    lower.push(sma - multiplier * stdDev);
   }
-  return { upper: upperBands, lower: lowerBands, middle: sma };
+
+  return {
+    upper,
+    lower,
+    middle,
+  };
 }
 
 export function generateBollingerSignal(
+  symbol: string,
   closePrices: number[],
-  periodBB: number,
-  stdDevMultiplier: number,
-): Signal {
+): IndicatorResult {
   const { upper, lower, middle } = calculateBollingerBands(
     closePrices,
     periodBB,
     stdDevMultiplier,
   );
 
-  const lastIdx = closePrices.length - 1;
-  const currentClose = closePrices[lastIdx];
-  const currentUpperBB = upper[lastIdx];
-  const currentLowerBB = lower[lastIdx];
+  const lastIndex = closePrices.length - 1;
 
-  if (currentClose > currentUpperBB) {
-    return Signal.sell;
-  } else if (currentClose < currentLowerBB) {
-    return Signal.buy;
-  } else {
-    return Signal.neutral;
+  const currentPrice = closePrices[lastIndex];
+
+  const upperBand = upper[lastIndex];
+
+  const lowerBand = lower[lastIndex];
+
+  const middleBand = middle[lastIndex];
+
+  let signal = IndicatorSignal.NEUTRAL;
+
+  if (currentPrice > upperBand) {
+    signal = IndicatorSignal.SELL;
   }
+
+  if (currentPrice < lowerBand) {
+    signal = IndicatorSignal.BUY;
+  }
+
+  const distance = (Math.abs(currentPrice - middleBand) / middleBand) * 100;
+
+  return {
+    symbol,
+
+    indicator: "BOLLINGER",
+
+    signal,
+
+    strength: Math.min(distance, 100),
+
+    value: currentPrice,
+  };
 }
-
-export const getBollingerSignals = async (histories: any[]) => {
-  const signals: string[] = [];
-
-  try {
-    histories.forEach((history) => {
-      const signal = generateBollingerSignal(
-        history.c,
-        periodBB,
-        stdDevMultiplier,
-      );
-      signals.push(signal);
-    });
-  } catch (error) {
-    console.error(error);
-  }
-
-  return signals;
-};

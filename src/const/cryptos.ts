@@ -15,4 +15,5 @@ export const cryptos = [
   "LINK",
   "DOT",
   "AAVE",
+  "SUI",
 ];

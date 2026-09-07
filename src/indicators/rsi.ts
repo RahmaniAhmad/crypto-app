@@ -1,74 +1,52 @@
-import {
-  Signal,
-  periodRSI,
-  overboughtThreshold,
-  oversoldThreshold,
-} from "@/const";
-import { calculateSMA } from "./sma";
+import { periodRSI, overboughtThreshold, oversoldThreshold } from "@/const";
+
+import { IndicatorResult, IndicatorSignal } from "./types";
 
 export function calculateRSI(closePrices: number[], period: number): number {
-  const prices = closePrices.slice(-period);
-  const changes: number[] = [];
+  if (closePrices.length < period + 1) {
+    return 50;
+  }
+
+  const prices = closePrices.slice(-period - 1);
+
+  let gains = 0;
+  let losses = 0;
+
   for (let i = 1; i < prices.length; i++) {
-    changes.push(prices[i] - prices[i - 1]);
+    const change = prices[i] - prices[i - 1];
+
+    if (change > 0) gains += change;
+    else losses += Math.abs(change);
   }
 
-  const gains: number[] = [0];
-  const losses: number[] = [0];
+  if (losses === 0) return 100;
 
-  for (let i = 0; i < changes.length; i++) {
-    if (changes[i] > 0) {
-      gains.push(changes[i]);
-    } else {
-      gains.push(0);
-    }
+  const rs = gains / losses;
 
-    if (changes[i] < 0) {
-      losses.push(Math.abs(changes[i]));
-    } else {
-      losses.push(0);
-    }
-  }
-  const avgGain = calculateSMA(gains, period);
-  const avgLoss = calculateSMA(losses, period);
-
-  const relativeStrength = avgGain / avgLoss;
-  const rsi = 100 - 100 / (1 + relativeStrength);
-  return rsi;
+  return 100 - 100 / (1 + rs);
 }
 
 export function generateRSISignal(
+  symbol: string,
   closePrices: number[],
-  periodRSI: number,
-  overboughtThreshold: number,
-  oversoldThreshold: number
-): Signal {
+): IndicatorResult {
   const rsi = calculateRSI(closePrices, periodRSI);
 
-  if (rsi > overboughtThreshold) {
-    return Signal.sell;
-  } else if (rsi < oversoldThreshold) {
-    return Signal.buy;
-  } else {
-    return Signal.neutral;
-  }
+  let signal = IndicatorSignal.NEUTRAL;
+
+  if (rsi < oversoldThreshold) signal = IndicatorSignal.BUY;
+
+  if (rsi > overboughtThreshold) signal = IndicatorSignal.SELL;
+
+  return {
+    symbol,
+
+    indicator: "RSI",
+
+    signal,
+
+    strength: Math.min(Math.abs(50 - rsi) * 2, 100),
+
+    value: rsi,
+  };
 }
-
-export const getRSISignals = async (histories: any[]) => {
-  const signals: string[] = [];
-  try {
-    histories.forEach((history) => {
-      const signal = generateRSISignal(
-        history.c,
-        periodRSI,
-        overboughtThreshold,
-        oversoldThreshold
-      );
-      signals.push(signal);
-    });
-  } catch (error) {
-    console.error(error);
-  }
-
-  return signals;
-};
