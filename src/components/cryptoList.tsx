@@ -1,136 +1,75 @@
 "use client";
 
 import { Input } from "@nextui-org/react";
+import { useMemo, useState } from "react";
+
 import ShowColumnData from "./showColumnData";
-import { cryptos } from "@/const";
-import { getBollingerSignals } from "@/lib/bollinger";
-import { getMacdSignals } from "@/lib/macd";
-import { getSmaSignals } from "@/lib/sma";
-import { getRSISignals } from "@/lib/rsi";
-import { useEffect, useState } from "react";
-import ShowColumnBreakoutData from "./showColumnBreakoutData";
-import {
-  getReistanceBreakouts,
-  getSupportBreakouts,
-} from "@/lib/supportResistanceBreakouts";
-interface CryptoListProps {
-  histories: any[];
-  reportDate: string;
+import StateMessage from "./ui/StateMessage";
+
+import { IndicatorResult } from "@/indicators/types";
+
+interface CryptoAnalysis {
+  symbol: string;
+  indicators: IndicatorResult[];
 }
-const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
-  const [bollingerSignals, setBollingerSignals] = useState<string[]>([]);
-  const [macdSignals, setMacdSignals] = useState<string[]>([]);
-  const [smaSignals, setSmaSignals] = useState<string[]>([]);
-  const [rsiSignals, setRsiSignals] = useState<string[]>([]);
-  const [supportBreakouts, setSupportBreakouts] = useState<any[]>([]);
-  const [resistanceBreakouts, setResistanceBreakouts] = useState<any[]>([]);
-  const [prices, setPrices] = useState<string[]>([]);
-  const [searchCrypto, setSearchCrypto] = useState<string | undefined>();
-  const [searchHistory, setSearchHistory] = useState<any[]>([]);
-  const [selectedCryptos, setSelectedCryptos] = useState<
-    string[] | undefined
-  >();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const bollingerSignals = await getBollingerSignals(
-          searchCrypto ? searchHistory : histories
-        );
-        setBollingerSignals(bollingerSignals);
+interface CryptoListProps {
+  data: CryptoAnalysis[];
+  reportDate?: string;
+}
 
-        const macdSignals = await getMacdSignals(
-          searchCrypto ? searchHistory : histories
-        );
-        setMacdSignals(macdSignals);
+const CryptoList = ({ data, reportDate }: CryptoListProps) => {
+  const [searchCrypto, setSearchCrypto] = useState("");
 
-        const smaSignals = await getSmaSignals(
-          searchCrypto ? searchHistory : histories
-        );
-        setSmaSignals(smaSignals);
-
-        const rsiSignals = await getRSISignals(
-          searchCrypto ? searchHistory : histories
-        );
-        setRsiSignals(rsiSignals);
-
-        const supportBreakouts = await getSupportBreakouts(
-          searchCrypto ? searchHistory : histories
-        );
-        setSupportBreakouts(supportBreakouts);
-
-        const resistanceBreakouts = await getReistanceBreakouts(
-          searchCrypto ? searchHistory : histories
-        );
-
-        const closePrices: string[] = [];
-        if (searchHistory.length > 0) {
-          searchHistory.map((item) => {
-            closePrices.push(item.c[item.c.length - 1]);
-          });
-        } else if (histories) {
-          histories.map((item) => {
-            closePrices.push(item.c[item.c.length - 1]);
-          });
-        }
-        setPrices(closePrices);
-
-        setResistanceBreakouts(resistanceBreakouts);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, [histories, searchCrypto, searchHistory]);
-
-  const getIndexesStartingWithSearchValue = (
-    arr: string[],
-    targetChar: string
-  ): number[] => {
-    const indexes: number[] = [];
-
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].startsWith(targetChar)) {
-        indexes.push(i);
-      }
+  const filteredData = useMemo(() => {
+    if (!searchCrypto) {
+      return data;
     }
 
-    return indexes;
+    return data.filter((item) =>
+      item.symbol.startsWith(searchCrypto.toUpperCase()),
+    );
+  }, [data, searchCrypto]);
+
+  const getIndicatorColumn = (indicatorName: string) => {
+    return filteredData.map((item) => {
+      const indicator = item.indicators.find(
+        (x) => x.indicator === indicatorName,
+      );
+
+      return indicator?.signal ?? "-";
+    });
   };
 
-  function getItemsByIndexes(arr: any[], indexes: number[]): any[] {
-    return indexes.map((index) => arr[index]);
-  }
+  const getCryptos = () => {
+    return filteredData.map((item) => item.symbol);
+  };
 
-  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchCrypto(value);
-    const indexes = getIndexesStartingWithSearchValue(
-      cryptos,
-      value.toUpperCase()
-    );
+  const getIndicatorValue = (indicatorName: string) => {
+    return filteredData.map((item) => {
+      const indicator = item.indicators.find(
+        (x) => x.indicator === indicatorName,
+      );
 
-    if (indexes.length > 0) {
-      const searchHistories = getItemsByIndexes(histories, indexes);
-      const searchSymbols = getItemsByIndexes(cryptos, indexes);
-      setSelectedCryptos(searchSymbols);
-      setSearchHistory(searchHistories);
-    } else {
-      setSelectedCryptos(undefined);
-      setSearchHistory([]);
-    }
+      if (indicator?.value === undefined) {
+        return "-";
+      }
+
+      return indicator.value.toFixed(4);
+    });
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchCrypto(event.target.value);
   };
 
   const handleClearSearch = () => {
     setSearchCrypto("");
-    setSelectedCryptos(undefined);
-    setSearchHistory([]);
   };
-  const getCryptos = () => {
-    if (selectedCryptos) return selectedCryptos;
-    if (searchCrypto) return [];
-    return cryptos;
-  };
+
+  if (!data.length) {
+    return <StateMessage message="No market data available." />;
+  }
 
   return (
     <div>
@@ -138,22 +77,36 @@ const CryptoList = ({ histories, reportDate }: CryptoListProps) => {
         <Input
           isClearable
           placeholder="Search..."
-          name="filter"
           value={searchCrypto}
           onChange={handleSearch}
           onClear={handleClearSearch}
         />
       </div>
-      <div className="py-2 text-center">{reportDate}</div>
+
+      {reportDate && <div className="py-2 text-center">{reportDate}</div>}
+
       <div className="grid grid-cols-8">
         <ShowColumnData title="Name" data={getCryptos()} />
-        <ShowColumnData title="Bollinger" data={bollingerSignals} />
-        <ShowColumnData title="MACD" data={macdSignals} />
-        <ShowColumnData title="SMA" data={smaSignals} />
-        <ShowColumnData title="RSI" data={rsiSignals} />
-        <ShowColumnBreakoutData title="SUPPORT" data={supportBreakouts} />
-        <ShowColumnData title="Price" data={prices} />
-        <ShowColumnBreakoutData title="RESISTANCE" data={resistanceBreakouts} />
+
+        <ShowColumnData
+          title="Bollinger"
+          data={getIndicatorColumn("BOLLINGER")}
+        />
+
+        <ShowColumnData title="MACD" data={getIndicatorColumn("MACD")} />
+
+        <ShowColumnData title="SMA" data={getIndicatorColumn("SMA")} />
+
+        <ShowColumnData title="RSI" data={getIndicatorColumn("RSI")} />
+
+        <ShowColumnData title="Price" data={getIndicatorValue("PRICE")} />
+
+        <ShowColumnData title="SUPPORT" data={getIndicatorValue("SUPPORT")} />
+
+        <ShowColumnData
+          title="RESISTANCE"
+          data={getIndicatorValue("RESISTANCE")}
+        />
       </div>
     </div>
   );
