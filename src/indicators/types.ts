@@ -11,3 +11,8 @@ export interface IndicatorResult {
   strength: number;
   value?: number;
 }
+
+export interface CryptoAnalysis {
+  symbol: string;
+  indicators: IndicatorResult[];
+}

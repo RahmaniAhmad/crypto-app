@@ -6,8 +6,9 @@ import { generateMacdSignal } from "./macd";
 import { generateBollingerSignal } from "./bollinger";
 import { generatePriceIndicator } from "./price";
 import { generateSupportResistanceSignals } from "./supportResistanceBreakouts";
+import { IndicatorResult } from "./types";
 
-export function runIndicators(history: MarketHistory) {
+export function runIndicators(history: MarketHistory): IndicatorResult[] {
   return [
     generatePriceIndicator(history.symbol, history.close),
 

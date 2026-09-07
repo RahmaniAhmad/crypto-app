@@ -8,19 +8,45 @@ export enum MarketType {
   usdt = "USDT",
   irt = "IRT",
 }
-export const periodPoint = 14; //days Short-Term Trading:7 or 14 days, Medium-Term Trading 30 or 60 days. Long-Term Investing 90 or 180 days
-export const resolution = 60; //60, 180, 240, 360, 720, D, 2D, 3D
 
-export const shortPeriodSMA = 168; //number of time units (e.g., days) , 30 days * 24 hours/4 = 180 periods
-export const longPeriodSMA = 336; //number of time units (e.g., days) , 30 days * 24 hours/4 = 180 periods
+// Candle timeframe
+export const resolution = "5m";
+export const candleLimit = 500;
 
-export const periodBB = 336; // the number of time units
-export const stdDevMultiplier = 2; //the number of standard deviations used to calculate the width of the Bollinger Bands
+// =====================
+// SMA
+// =====================
 
-export const shortPeriod = 12; //the shorter time period used to calculate the Exponential Moving Average
-export const longPeriod = 26; //the longer time period used to calculate the Exponential Moving Average
-export const signalPeriod = 9; //the time period used to calculate the signal line
+// Fast trend
+export const shortPeriodSMA = 20;
 
-export const periodRSI = 336; // the number of candles, 1 day
-export const overboughtThreshold = 60;
-export const oversoldThreshold = 40;
+// Slow trend
+export const longPeriodSMA = 50;
+
+// =====================
+// Bollinger Bands
+// =====================
+
+export const periodBB = 20;
+
+export const stdDevMultiplier = 2;
+
+// =====================
+// MACD
+// =====================
+
+export const shortPeriod = 12;
+
+export const longPeriod = 26;
+
+export const signalPeriod = 9;
+
+// =====================
+// RSI
+// =====================
+
+export const periodRSI = 14;
+
+export const overboughtThreshold = 70;
+
+export const oversoldThreshold = 30;
