@@ -21,7 +21,10 @@ export async function getBinanceSymbols(): Promise<string[]> {
 
     return data.symbols
       .filter(
-        (item: any) => item.status === "TRADING" && item.quoteAsset === "USDT",
+        (item: any) =>
+          item.status === "TRADING" &&
+          item.quoteAsset === "USDT" &&
+          item.contractType === "PERPETUAL",
       )
       .map((item: any) => item.symbol);
   } catch (error) {

@@ -28,26 +28,22 @@ export function generateSmaSignal(
     };
   }
 
+  const difference = ((short - long) / long) * 100;
+
   let signal = IndicatorSignal.NEUTRAL;
 
-  if (short > long) {
+  // require meaningful separation
+  if (difference > 0.3) {
     signal = IndicatorSignal.BUY;
-  } else if (short < long) {
+  } else if (difference < -0.3) {
     signal = IndicatorSignal.SELL;
   }
 
-  const strength =
-    long === 0 ? 0 : Math.min((Math.abs(short - long) / long) * 100, 100);
-
   return {
     symbol,
-
     indicator: "SMA",
-
     signal,
-
-    strength,
-
+    strength: Math.min(Math.abs(difference) * 10, 100),
     value: short,
   };
 }

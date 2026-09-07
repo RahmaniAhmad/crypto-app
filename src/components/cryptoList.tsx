@@ -3,10 +3,9 @@
 import { Input } from "@nextui-org/react";
 import { useMemo, useState } from "react";
 
-import ShowColumnData from "./showColumnData";
-import StateMessage from "./ui/StateMessage";
-
 import { IndicatorResult } from "@/indicators/types";
+import { Signal } from "@/const";
+import StateMessage from "./ui/StateMessage";
 
 interface CryptoAnalysis {
   symbol: string;
@@ -15,101 +14,150 @@ interface CryptoAnalysis {
 
 interface CryptoListProps {
   data: CryptoAnalysis[];
-  reportDate?: string;
 }
 
-const CryptoList = ({ data, reportDate }: CryptoListProps) => {
-  const [searchCrypto, setSearchCrypto] = useState("");
+export default function CryptoList({ data }: CryptoListProps) {
+  const [search, setSearch] = useState("");
 
   const filteredData = useMemo(() => {
-    if (!searchCrypto) {
-      return data;
+    if (!search) return data;
+
+    return data.filter((x) => x.symbol.startsWith(search.toUpperCase()));
+  }, [data, search]);
+
+  const getIndicator = (indicators: IndicatorResult[], name: string) => {
+    return indicators.find((x) => x.indicator === name);
+  };
+
+  const getValue = (indicators: IndicatorResult[], name: string) => {
+    const item = getIndicator(indicators, name);
+
+    return item?.value !== undefined ? item.value.toFixed(4) : "-";
+  };
+
+  const getSignal = (indicators: IndicatorResult[], name: string) => {
+    return getIndicator(indicators, name)?.signal ?? "-";
+  };
+
+  const signalColor = (signal: string) => {
+    if (signal === Signal.buy) {
+      return "text-green-500 font-bold";
     }
 
-    return data.filter((item) =>
-      item.symbol.startsWith(searchCrypto.toUpperCase()),
-    );
-  }, [data, searchCrypto]);
+    if (signal === Signal.sell) {
+      return "text-red-500 font-bold";
+    }
 
-  const getIndicatorColumn = (indicatorName: string) => {
-    return filteredData.map((item) => {
-      const indicator = item.indicators.find(
-        (x) => x.indicator === indicatorName,
-      );
+    if (signal === Signal.neutral) {
+      return "text-gray-400 dark:text-gray-500";
+    }
 
-      return indicator?.signal ?? "-";
-    });
-  };
-
-  const getCryptos = () => {
-    return filteredData.map((item) => item.symbol);
-  };
-
-  const getIndicatorValue = (indicatorName: string) => {
-    return filteredData.map((item) => {
-      const indicator = item.indicators.find(
-        (x) => x.indicator === indicatorName,
-      );
-
-      if (indicator?.value === undefined) {
-        return "-";
-      }
-
-      return indicator.value.toFixed(4);
-    });
-  };
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchCrypto(event.target.value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchCrypto("");
+    return "text-foreground";
   };
 
   if (!data.length) {
-    return <StateMessage message="No market data available." />;
+    return (
+      <div className="rounded-xl border bg-background p-6 shadow-sm">
+        <h2 className="text-xl font-bold">Market Overview</h2>
+
+        <p className="mt-2 text-muted-foreground">
+          Binance Futures market analysis
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="py-2">
-        <Input
-          isClearable
-          placeholder="Search..."
-          value={searchCrypto}
-          onChange={handleSearch}
-          onClear={handleClearSearch}
-        />
+    <div className="space-y-4">
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold">Market Overview</h2>
+
+          <p className="text-sm text-muted-foreground">
+            Binance Futures market analysis
+          </p>
+        </div>
+
+        <span className="text-sm text-muted-foreground">
+          {filteredData.length} markets
+        </span>
       </div>
+      <Input
+        isClearable
+        placeholder="Search crypto..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        onClear={() => setSearch("")}
+      />
 
-      {reportDate && <div className="py-2 text-center">{reportDate}</div>}
+      <div className="overflow-x-auto rounded-xl border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-default-100">
+              <th className="p-3 text-left">Symbol</th>
 
-      <div className="grid grid-cols-8">
-        <ShowColumnData title="Name" data={getCryptos()} />
+              <th className="p-3">Price</th>
 
-        <ShowColumnData
-          title="Bollinger"
-          data={getIndicatorColumn("BOLLINGER")}
-        />
+              <th className="p-3">RSI</th>
 
-        <ShowColumnData title="MACD" data={getIndicatorColumn("MACD")} />
+              <th className="p-3">MACD</th>
 
-        <ShowColumnData title="SMA" data={getIndicatorColumn("SMA")} />
+              <th className="p-3">SMA</th>
 
-        <ShowColumnData title="RSI" data={getIndicatorColumn("RSI")} />
+              <th className="p-3">Bollinger</th>
 
-        <ShowColumnData title="Price" data={getIndicatorValue("PRICE")} />
+              <th className="p-3">Support</th>
 
-        <ShowColumnData title="SUPPORT" data={getIndicatorValue("SUPPORT")} />
+              <th className="p-3">Resistance</th>
+            </tr>
+          </thead>
 
-        <ShowColumnData
-          title="RESISTANCE"
-          data={getIndicatorValue("RESISTANCE")}
-        />
+          <tbody>
+            {filteredData.map((item) => {
+              const rsi = getSignal(item.indicators, "RSI");
+
+              const macd = getSignal(item.indicators, "MACD");
+
+              const sma = getSignal(item.indicators, "SMA");
+
+              const bollinger = getSignal(item.indicators, "BOLLINGER");
+
+              return (
+                <tr
+                  key={item.symbol}
+                  className="
+                    border-t
+                    hover:bg-default-100
+                    transition
+                  "
+                >
+                  <td className="p-3 font-semibold">{item.symbol}</td>
+
+                  <td className="p-3">{getValue(item.indicators, "PRICE")}</td>
+
+                  <td className={`p-3 ${signalColor(rsi)}`}>{rsi}</td>
+
+                  <td className={`p-3 ${signalColor(macd)}`}>{macd}</td>
+
+                  <td className={`p-3 ${signalColor(sma)}`}>{sma}</td>
+
+                  <td className={`p-3 ${signalColor(bollinger)}`}>
+                    {bollinger}
+                  </td>
+
+                  <td className="p-3">
+                    {getValue(item.indicators, "SUPPORT")}
+                  </td>
+
+                  <td className="p-3">
+                    {getValue(item.indicators, "RESISTANCE")}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-};
-
-export default CryptoList;
+}

@@ -1,5 +1,3 @@
-import { cryptos } from "@/const/cryptos";
-
 export function mapToBinanceSymbols(
   symbols: string[],
   availableSymbols: string[],
