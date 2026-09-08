@@ -53,21 +53,24 @@ export function generateMacdSignal(
 
   const latestSignal = signalLine[signalLine.length - 1];
 
+  const histogram = latestMACD - latestSignal;
+
   let signal = IndicatorSignal.NEUTRAL;
 
-  if (latestMACD > latestSignal) {
+  // bullish momentum
+  if (latestMACD > latestSignal && histogram > 0) {
     signal = IndicatorSignal.BUY;
-  } else if (latestMACD < latestSignal) {
+  }
+
+  // bearish momentum
+  else if (latestMACD < latestSignal && histogram < 0) {
     signal = IndicatorSignal.SELL;
   }
 
-  const strength =
-    latestSignal === 0
-      ? 0
-      : Math.min(
-          (Math.abs(latestMACD - latestSignal) / Math.abs(latestSignal)) * 100,
-          100,
-        );
+  const strength = Math.min(
+    (Math.abs(histogram) / Math.max(Math.abs(latestMACD), 0.000001)) * 100,
+    100,
+  );
 
   return {
     symbol,
@@ -76,8 +79,8 @@ export function generateMacdSignal(
 
     signal,
 
-    strength: Number.isFinite(strength) ? strength : 0,
+    strength: Number(strength.toFixed(2)),
 
-    value: latestMACD,
+    value: Number(latestMACD.toFixed(4)),
   };
 }

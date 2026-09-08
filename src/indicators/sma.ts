@@ -32,18 +32,22 @@ export function generateSmaSignal(
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  // require meaningful separation
-  if (difference > 0.3) {
+  // faster SMA above slower SMA
+  if (difference > 0.1) {
     signal = IndicatorSignal.BUY;
-  } else if (difference < -0.3) {
+  } else if (difference < -0.1) {
     signal = IndicatorSignal.SELL;
   }
 
   return {
     symbol,
+
     indicator: "SMA",
+
     signal,
-    strength: Math.min(Math.abs(difference) * 10, 100),
+
+    strength: Math.min(Math.abs(difference) * 20, 100),
+
     value: short,
   };
 }
