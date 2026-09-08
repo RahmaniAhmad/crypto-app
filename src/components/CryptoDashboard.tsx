@@ -3,7 +3,7 @@
 import { Tabs, Tab } from "@nextui-org/react";
 
 import CryptoScanner from "./scanner/CryptoScanner";
-import CryptoList from "./cryptoList";
+import CryptoList from "./crypto/CryptoList";
 
 import { IndicatorResult } from "@/indicators/types";
 import { CryptoScanResult } from "@/scanner/types";
