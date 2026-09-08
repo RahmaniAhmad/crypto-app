@@ -92,8 +92,8 @@ export default function CryptoList({ data }: CryptoListProps) {
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-default-100">
-              <th className="p-3 text-left">Symbol</th>
+            <tr className="bg-default-100 text-left">
+              <th className="p-3">Symbol</th>
 
               <th className="p-3">Price</th>
 

@@ -3,10 +3,9 @@ import { CryptoScanResult, ScannerSignal } from "./types";
 
 const WEIGHTS = {
   SMA: 25,
-  MACD: 30,
+  MACD: 35,
   RSI: 20,
-  BOLLINGER: 15,
-  PRICE: 10,
+  BOLLINGER: 20,
 };
 
 export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
@@ -36,9 +35,9 @@ export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
     let signal: ScannerSignal = "NEUTRAL";
 
     if (buySignals >= 4 && score >= 75) {
-      signal = "STRONG_BUY";
+      signal = "STRONG BUY";
     } else if (sellSignals >= 4 && score <= -75) {
-      signal = "STRONG_SELL";
+      signal = "STRONG SELL";
     }
 
     // Normal signals

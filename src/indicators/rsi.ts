@@ -14,11 +14,16 @@ export function calculateRSI(closePrices: number[], period: number): number {
   for (let i = 1; i < prices.length; i++) {
     const change = prices[i] - prices[i - 1];
 
-    if (change > 0) gains += change;
-    else losses += Math.abs(change);
+    if (change > 0) {
+      gains += change;
+    } else {
+      losses += Math.abs(change);
+    }
   }
 
-  if (losses === 0) return 100;
+  if (losses === 0) {
+    return 100;
+  }
 
   const rs = gains / losses;
 
@@ -33,9 +38,14 @@ export function generateRSISignal(
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  if (rsi < RSI_CONFIG.oversoldThreshold) signal = IndicatorSignal.BUY;
+  // Momentum based RSI
+  if (rsi >= 55) {
+    signal = IndicatorSignal.BUY;
+  } else if (rsi <= 45) {
+    signal = IndicatorSignal.SELL;
+  }
 
-  if (rsi > RSI_CONFIG.overboughtThreshold) signal = IndicatorSignal.SELL;
+  const strength = Math.min(Math.abs(50 - rsi) * 2, 100);
 
   return {
     symbol,
@@ -44,8 +54,8 @@ export function generateRSISignal(
 
     signal,
 
-    strength: Math.min(Math.abs(50 - rsi) * 2, 100),
+    strength: Number(strength.toFixed(2)),
 
-    value: rsi,
+    value: Number(rsi.toFixed(2)),
   };
 }
