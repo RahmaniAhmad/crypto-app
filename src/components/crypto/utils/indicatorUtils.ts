@@ -31,6 +31,9 @@ function formatIndicatorValue(value: number, indicator: string) {
     case "RSI":
       return value.toFixed(2);
 
+    case "VOLUME":
+      return `${value.toFixed(2)}x`;
+
     default:
       return value.toFixed(4);
   }

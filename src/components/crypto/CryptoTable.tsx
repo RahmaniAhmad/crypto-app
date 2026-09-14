@@ -22,6 +22,7 @@ type SortColumn =
   | "macd"
   | "sma"
   | "bollinger"
+  | "volume"
   | "support"
   | "resistance";
 
@@ -125,7 +126,13 @@ export default function CryptoTable({ data }: Props) {
               direction={sortDirection}
               onSort={handleSort}
             />
-
+            <SortableHeader
+              title="Volume"
+              column="volume"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
             <SortableHeader
               title="Support"
               column="support"

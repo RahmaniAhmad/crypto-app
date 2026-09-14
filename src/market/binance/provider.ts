@@ -48,6 +48,7 @@ export class BinanceMarketProvider implements MarketProvider {
           );
 
           const close = candles.map((candle) => Number(candle[4]));
+          const volume = candles.map((candle) => Number(candle[5]));
 
           if (close.length === 0) {
             return null;
@@ -56,6 +57,7 @@ export class BinanceMarketProvider implements MarketProvider {
           return {
             symbol: symbol.replace("USDT", ""),
             close,
+            volume,
           };
         } catch (error) {
           console.error(`Failed to fetch history for ${symbol}:`, error);
