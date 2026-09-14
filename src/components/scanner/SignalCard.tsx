@@ -1,7 +1,8 @@
 import { CryptoScanResult } from "@/scanner/types";
+
+import IndicatorChips from "./IndicatorChips";
 import SignalBadge from "./SignalBadge";
 import SignalStrength from "./SignalStrength";
-import IndicatorChips from "./IndicatorChips";
 
 interface Props {
   item: CryptoScanResult;

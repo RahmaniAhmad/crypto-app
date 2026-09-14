@@ -1,4 +1,5 @@
 import { CryptoAnalysis } from "@/indicators/types";
+
 import { CryptoScanResult, ScannerSignal } from "./types";
 
 const WEIGHTS = {
@@ -7,6 +8,8 @@ const WEIGHTS = {
   RSI: 20,
   BOLLINGER: 20,
 };
+
+const VOLUME_BONUS = 10;
 
 export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
   return cryptos.map((crypto) => {
@@ -24,11 +27,29 @@ export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
       }
     }
 
-    const buySignals = crypto.indicators.filter(
+    const volumeIndicator = crypto.indicators.find(
+      (x) => x.indicator === "VOLUME",
+    );
+
+    if (volumeIndicator?.signal === "BUY" && score > 0) {
+      score += VOLUME_BONUS;
+    }
+
+    if (volumeIndicator?.signal === "SELL" && score < 0) {
+      score -= VOLUME_BONUS;
+    }
+
+    score = Math.max(-100, Math.min(100, score));
+
+    const directionalIndicators = crypto.indicators.filter(
+      (x) => x.indicator !== "VOLUME" && x.indicator !== "PRICE",
+    );
+
+    const buySignals = directionalIndicators.filter(
       (x) => x.signal === "BUY",
     ).length;
 
-    const sellSignals = crypto.indicators.filter(
+    const sellSignals = directionalIndicators.filter(
       (x) => x.signal === "SELL",
     ).length;
 
@@ -38,10 +59,7 @@ export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
       signal = "STRONG BUY";
     } else if (sellSignals >= 4 && score <= -75) {
       signal = "STRONG SELL";
-    }
-
-    // Normal signals
-    else if (buySignals >= 3 && score >= 50) {
+    } else if (buySignals >= 3 && score >= 50) {
       signal = "BUY";
     } else if (sellSignals >= 3 && score <= -50) {
       signal = "SELL";

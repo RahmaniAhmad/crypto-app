@@ -1,4 +1,4 @@
-import { MarketHistory } from "@/api/market/types";
+import { MarketHistory } from "@/market";
 import { IndicatorResult, IndicatorSignal } from "./types";
 
 export type SupportResistanceType = "SUPPORT" | "RESISTANCE";

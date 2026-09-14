@@ -1,12 +1,13 @@
-import { MarketHistory } from "@/api/market/types";
+import { MarketHistory } from "@/market";
 
-import { generateSmaSignal } from "./sma";
-import { generateRSISignal } from "./rsi";
-import { generateMacdSignal } from "./macd";
 import { generateBollingerSignal } from "./bollinger";
+import { generateMacdSignal } from "./macd";
 import { generatePriceIndicator } from "./price";
+import { generateRSISignal } from "./rsi";
+import { generateSmaSignal } from "./sma";
 import { generateSupportResistanceSignals } from "./supportResistanceBreakouts";
 import { IndicatorResult } from "./types";
+import { generateVolumeSignal } from "./Volume";
 
 export function runIndicators(history: MarketHistory): IndicatorResult[] {
   return [
@@ -19,6 +20,8 @@ export function runIndicators(history: MarketHistory): IndicatorResult[] {
     generateMacdSignal(history.symbol, history.close),
 
     generateBollingerSignal(history.symbol, history.close),
+
+    generateVolumeSignal(history.symbol, history.close, history.volume),
 
     ...generateSupportResistanceSignals(history.symbol, history.close),
   ];

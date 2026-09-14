@@ -35,3 +35,12 @@ export const RSI_CONFIG = {
   overboughtThreshold: 70,
   oversoldThreshold: 30,
 };
+
+// =====================
+// VOLUME
+// =====================
+
+export const VOLUME_CONFIG = {
+  period: 20,
+  threshold: 1.5,
+};

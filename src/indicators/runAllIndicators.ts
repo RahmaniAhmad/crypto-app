@@ -1,4 +1,5 @@
-import { MarketHistory } from "@/api/market/types";
+import { MarketHistory } from "@/market";
+
 import { runIndicators } from "./runIndicators";
 import { CryptoAnalysis } from "./types";
 

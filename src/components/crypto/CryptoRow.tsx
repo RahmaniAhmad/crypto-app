@@ -21,6 +21,8 @@ export default function CryptoRow({ item }: Props) {
 
   const price = getValue(item.indicators, "PRICE");
 
+  const volume = getValue(item.indicators, "VOLUME");
+
   const support = getValue(item.indicators, "SUPPORT");
 
   const resistance = getValue(item.indicators, "RESISTANCE");
@@ -43,11 +45,13 @@ export default function CryptoRow({ item }: Props) {
 
       <td className={`p-3 ${signalColor(bollinger)}`}>{bollinger}</td>
 
-      <td className="p-3">{getValue(item.indicators, "PRICE")}</td>
+      <td className="p-3">{price}</td>
 
-      <td className="p-3">{getValue(item.indicators, "SUPPORT")}</td>
+      <td className="p-3">{volume}</td>
 
-      <td className="p-3">{getValue(item.indicators, "RESISTANCE")}</td>
+      <td className="p-3">{support}</td>
+
+      <td className="p-3">{resistance}</td>
     </tr>
   );
 }

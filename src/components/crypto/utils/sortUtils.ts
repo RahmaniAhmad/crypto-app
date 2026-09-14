@@ -29,6 +29,9 @@ export function getSortValue(
     case "price":
       return indicator("PRICE");
 
+    case "volume":
+      return indicator("VOLUME");
+
     case "support":
       return indicator("SUPPORT");
 
