@@ -1,5 +1,9 @@
-import { SMA_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
+
+interface SmaConfig {
+  shortPeriod: number;
+  longPeriod: number;
+}
 
 export function calculateSMA(data: number[], period: number): number {
   if (data.length < period) {
@@ -14,10 +18,11 @@ export function calculateSMA(data: number[], period: number): number {
 export function generateSmaSignal(
   symbol: string,
   closePrices: number[],
+  config: SmaConfig,
 ): IndicatorResult {
-  const short = calculateSMA(closePrices, SMA_CONFIG.shortPeriod);
+  const short = calculateSMA(closePrices, config.shortPeriod);
 
-  const long = calculateSMA(closePrices, SMA_CONFIG.longPeriod);
+  const long = calculateSMA(closePrices, config.longPeriod);
 
   if (Number.isNaN(short) || Number.isNaN(long)) {
     return {

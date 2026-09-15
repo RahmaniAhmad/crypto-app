@@ -1,19 +1,28 @@
-import { marketProvider } from "@/market";
 import CryptoDashboard from "@/components/CryptoDashboard";
 import { TRADING_CONFIG } from "@/config";
-import { runAllIndicators } from "@/indicators/runAllIndicators";
-import { scanCryptos } from "@/scanner/cryptoScanner";
+import { isTradingResolution } from "@/utils/tradingResolution";
+import { analyzeMarket } from "@/analysis";
 
-export default async function Home() {
-  const symbols = await marketProvider.getSymbols(
-    TRADING_CONFIG.marketSymbolLimit || 50,
+interface Props {
+  searchParams: Promise<{
+    resolution?: string;
+  }>;
+}
+
+export default async function Home({ searchParams }: Props) {
+  const { resolution: resolutionParam } = await searchParams;
+
+  const resolution = isTradingResolution(resolutionParam)
+    ? resolutionParam
+    : TRADING_CONFIG.resolution;
+
+  const { analysis, scanned } = await analyzeMarket(resolution);
+
+  return (
+    <CryptoDashboard
+      analysis={analysis}
+      scanned={scanned}
+      resolution={resolution}
+    />
   );
-
-  const histories = await marketProvider.getHistory(symbols);
-
-  const analysis = runAllIndicators(histories);
-
-  const scanned = scanCryptos(analysis);
-
-  return <CryptoDashboard analysis={analysis} scanned={scanned} />;
 }

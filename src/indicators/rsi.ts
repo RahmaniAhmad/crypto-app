@@ -1,5 +1,8 @@
-import { RSI_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
+
+interface RsiConfig {
+  period: number;
+}
 
 export function calculateRSI(closePrices: number[], period: number): number {
   if (closePrices.length < period + 1) {
@@ -33,12 +36,12 @@ export function calculateRSI(closePrices: number[], period: number): number {
 export function generateRSISignal(
   symbol: string,
   closePrices: number[],
+  config: RsiConfig,
 ): IndicatorResult {
-  const rsi = calculateRSI(closePrices, RSI_CONFIG.period);
+  const rsi = calculateRSI(closePrices, config.period);
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  // Momentum based RSI
   if (rsi >= 55) {
     signal = IndicatorSignal.BUY;
   } else if (rsi <= 45) {
