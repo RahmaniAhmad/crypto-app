@@ -3,6 +3,7 @@ import { TRADING_CONFIG } from "@/config";
 import { MarketProvider } from "../marketProvider";
 import { MarketHistory } from "../types";
 import { BinanceClient } from "./client";
+import { TradingResolution } from "@/types";
 
 export class BinanceMarketProvider implements MarketProvider {
   constructor(private readonly client = new BinanceClient()) {}
@@ -37,13 +38,16 @@ export class BinanceMarketProvider implements MarketProvider {
     }
   }
 
-  async getHistory(symbols: string[]): Promise<MarketHistory[]> {
+  async getHistory(
+    symbols: string[],
+    resolution: TradingResolution,
+  ): Promise<MarketHistory[]> {
     const histories = await Promise.all(
       symbols.map(async (symbol) => {
         try {
           const candles = await this.client.getKlines(
             symbol,
-            TRADING_CONFIG.resolution,
+            resolution,
             TRADING_CONFIG.candleLimit,
           );
 

@@ -1,5 +1,9 @@
-import { VOLUME_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
+
+interface VolumeConfig {
+  period: number;
+  threshold: number;
+}
 
 function calculateAverageVolume(volumes: number[], period: number): number {
   if (volumes.length < period) {
@@ -15,8 +19,9 @@ export function generateVolumeSignal(
   symbol: string,
   closePrices: number[],
   volumes: number[],
+  config: VolumeConfig,
 ): IndicatorResult {
-  if (closePrices.length < 2 || volumes.length < VOLUME_CONFIG.period) {
+  if (closePrices.length < 2 || volumes.length < config.period) {
     return {
       symbol,
       indicator: "VOLUME",
@@ -29,7 +34,7 @@ export function generateVolumeSignal(
 
   const averageVolume = calculateAverageVolume(
     volumes.slice(0, -1),
-    VOLUME_CONFIG.period,
+    config.period,
   );
 
   if (Number.isNaN(averageVolume) || averageVolume <= 0) {
@@ -47,13 +52,13 @@ export function generateVolumeSignal(
   const previousClose = closePrices[closePrices.length - 2];
 
   const volumeStrength = Math.min(
-    ((volumeRatio - 1) / (VOLUME_CONFIG.threshold - 1)) * 100,
+    ((volumeRatio - 1) / (config.threshold - 1)) * 100,
     100,
   );
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  if (volumeRatio >= VOLUME_CONFIG.threshold) {
+  if (volumeRatio >= config.threshold) {
     if (currentClose > previousClose) {
       signal = IndicatorSignal.BUY;
     } else if (currentClose < previousClose) {

@@ -1,11 +1,16 @@
-import { MACD_CONFIG } from "@/config";
 import { IndicatorResult, IndicatorSignal } from "./types";
 import { calculateEMA } from "./utils/ema";
 
-export function calculateMACD(closePrices: number[]) {
-  const shortEMA = calculateEMA(closePrices, MACD_CONFIG.shortPeriod);
+interface MacdConfig {
+  shortPeriod: number;
+  longPeriod: number;
+  signalPeriod: number;
+}
 
-  const longEMA = calculateEMA(closePrices, MACD_CONFIG.longPeriod);
+export function calculateMACD(closePrices: number[], config: MacdConfig) {
+  const shortEMA = calculateEMA(closePrices, config.shortPeriod);
+
+  const longEMA = calculateEMA(closePrices, config.longPeriod);
 
   if (shortEMA.length === 0 || longEMA.length === 0) {
     return {
@@ -14,7 +19,7 @@ export function calculateMACD(closePrices: number[]) {
     };
   }
 
-  const offset = MACD_CONFIG.longPeriod - MACD_CONFIG.shortPeriod;
+  const offset = config.longPeriod - config.shortPeriod;
 
   const macdLine: number[] = [];
 
@@ -26,7 +31,7 @@ export function calculateMACD(closePrices: number[]) {
     }
   }
 
-  const signalLine = calculateEMA(macdLine, MACD_CONFIG.signalPeriod);
+  const signalLine = calculateEMA(macdLine, config.signalPeriod);
 
   return {
     macdLine,
@@ -37,8 +42,9 @@ export function calculateMACD(closePrices: number[]) {
 export function generateMacdSignal(
   symbol: string,
   closePrices: number[],
+  config: MacdConfig,
 ): IndicatorResult {
-  const { macdLine, signalLine } = calculateMACD(closePrices);
+  const { macdLine, signalLine } = calculateMACD(closePrices, config);
 
   if (macdLine.length === 0 || signalLine.length === 0) {
     return {
@@ -57,13 +63,9 @@ export function generateMacdSignal(
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  // bullish momentum
-  if (latestMACD > latestSignal && histogram > 0) {
+  if (latestMACD > latestSignal) {
     signal = IndicatorSignal.BUY;
-  }
-
-  // bearish momentum
-  else if (latestMACD < latestSignal && histogram < 0) {
+  } else if (latestMACD < latestSignal) {
     signal = IndicatorSignal.SELL;
   }
 

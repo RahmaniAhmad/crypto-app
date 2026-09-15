@@ -1,7 +1,11 @@
 import { IndicatorResult, IndicatorSignal } from "./types";
 
 import { calculateSMA } from "./sma";
-import { BOLLINGER_CONFIG } from "@/config";
+
+interface BollingerConfig {
+  period: number;
+  stdDevMultiplier: number;
+}
 
 export function calculateBollingerBands(
   closePrices: number[],
@@ -44,11 +48,12 @@ export function calculateBollingerBands(
 export function generateBollingerSignal(
   symbol: string,
   closePrices: number[],
+  config: BollingerConfig,
 ): IndicatorResult {
   const { upper, lower, middle } = calculateBollingerBands(
     closePrices,
-    BOLLINGER_CONFIG.period,
-    BOLLINGER_CONFIG.stdDevMultiplier,
+    config.period,
+    config.stdDevMultiplier,
   );
 
   const lastIndex = closePrices.length - 1;
@@ -77,10 +82,9 @@ export function generateBollingerSignal(
 
   let signal = IndicatorSignal.NEUTRAL;
 
-  // More active thresholds
-  if (bandPosition <= 0.3) {
+  if (currentPrice > middleBand && bandPosition >= 0.7) {
     signal = IndicatorSignal.BUY;
-  } else if (bandPosition >= 0.7) {
+  } else if (currentPrice < middleBand && bandPosition <= 0.3) {
     signal = IndicatorSignal.SELL;
   }
 
