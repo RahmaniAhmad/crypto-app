@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TRADING_CONFIG } from "@/config";
 import { CryptoScanResult } from "@/scanner/types";
-import SignalCard from "./SignalCard";
+import SignalCard from "./components/SignalCard";
 
 interface Props {
   data: CryptoScanResult[];

@@ -7,12 +7,16 @@ export type ScannerSignal =
   | "SELL"
   | "STRONG SELL";
 
+export type SignalConfidence = "HIGH" | "MEDIUM" | "LOW";
+
 export interface CryptoScanResult {
   symbol: string;
 
   score: number;
 
   signal: ScannerSignal;
+
+  confidence: SignalConfidence;
 
   indicators: IndicatorResult[];
 }
