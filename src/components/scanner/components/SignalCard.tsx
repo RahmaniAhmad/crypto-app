@@ -1,8 +1,8 @@
 import { CryptoScanResult } from "@/scanner/types";
-
+import ConfidenceBadge from "./ConfidenceBadge";
 import IndicatorChips from "./IndicatorChips";
 import SignalBadge from "./SignalBadge";
-import SignalStrength from "./SignalStrength";
+import SignalScore from "./SignalScore";
 
 interface Props {
   item: CryptoScanResult;
@@ -38,8 +38,10 @@ export default function SignalCard({ item, rank }: Props) {
         <SignalBadge signal={item.signal} />
       </div>
 
-      <SignalStrength score={item.score} />
-
+      <SignalScore score={item.score} />
+      <div className="mt-3">
+        <ConfidenceBadge confidence={item.confidence} />
+      </div>
       <IndicatorChips indicators={item.indicators} />
     </div>
   );

@@ -2,17 +2,16 @@ interface Props {
   score: number;
 }
 
-export default function SignalStrength({ score }: Props) {
+export default function SignalScore({ score }: Props) {
   const strength = Math.abs(score);
-
   const isBuy = score >= 0;
 
   return (
     <div className="mt-4">
       <div className="mb-2 flex justify-between text-sm">
-        <span className="text-muted-foreground">Strength</span>
+        <span className="text-muted-foreground">Score</span>
 
-        <span className="font-bold">{strength}%</span>
+        <span className="font-bold">{score}</span>
       </div>
 
       <div className="h-2 overflow-hidden rounded-full bg-muted">

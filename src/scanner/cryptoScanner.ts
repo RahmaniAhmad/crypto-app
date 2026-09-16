@@ -1,5 +1,6 @@
 import { CryptoAnalysis } from "@/indicators/types";
 
+import { calculateSignalConfidence } from "./signalConfidence";
 import { CryptoScanResult, ScannerSignal } from "./types";
 
 const WEIGHTS = {
@@ -65,10 +66,13 @@ export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
       signal = "SELL";
     }
 
+    const confidence = calculateSignalConfidence(buySignals, sellSignals);
+
     return {
       symbol: crypto.symbol,
       score,
       signal,
+      confidence,
       indicators: crypto.indicators,
     };
   });
