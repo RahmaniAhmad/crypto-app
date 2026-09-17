@@ -1,6 +1,5 @@
 import { CryptoAnalysis } from "@/indicators/types";
 
-import { calculateSignalConfidence } from "./signalConfidence";
 import {
   CryptoScanResult,
   MultiTimeframeAnalysis,
@@ -73,13 +72,10 @@ export function scanCryptos(
       signal = "SELL";
     }
 
-    const confidence = calculateSignalConfidence(buySignals, sellSignals);
-
     return {
       symbol: crypto.symbol,
       score,
       signal,
-      confidence,
       indicators: crypto.indicators,
       multiTimeframe: multiTimeframes[crypto.symbol],
     };
