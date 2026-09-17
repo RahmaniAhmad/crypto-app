@@ -1,9 +1,9 @@
 import { TRADING_CONFIG } from "@/config";
+import { TradingResolution } from "@/types";
 
 import { MarketProvider } from "../marketProvider";
-import { MarketHistory } from "../types";
+import { MarketHistory, MultiTimeframeHistory } from "../types";
 import { BinanceClient } from "./client";
-import { TradingResolution } from "@/types";
 
 export class BinanceMarketProvider implements MarketProvider {
   constructor(private readonly client = new BinanceClient()) {}
@@ -74,5 +74,43 @@ export class BinanceMarketProvider implements MarketProvider {
     return histories.filter(
       (history): history is MarketHistory => history !== null,
     );
+  }
+
+  async getMultiTimeframeHistory(
+    symbols: string[],
+  ): Promise<Record<string, MultiTimeframeHistory>> {
+    const [higher, primary, entry] = await Promise.all([
+      this.getHistory(symbols, "4h"),
+      this.getHistory(symbols, "1h"),
+      this.getHistory(symbols, "15m"),
+    ]);
+
+    const higherMap = new Map(higher.map((item) => [item.symbol, item]));
+
+    const primaryMap = new Map(primary.map((item) => [item.symbol, item]));
+
+    const entryMap = new Map(entry.map((item) => [item.symbol, item]));
+
+    const result: Record<string, MultiTimeframeHistory> = {};
+
+    for (const symbol of symbols) {
+      const normalizedSymbol = symbol.replace("USDT", "");
+
+      const higherHistory = higherMap.get(normalizedSymbol);
+      const primaryHistory = primaryMap.get(normalizedSymbol);
+      const entryHistory = entryMap.get(normalizedSymbol);
+
+      if (!higherHistory || !primaryHistory || !entryHistory) {
+        continue;
+      }
+
+      result[normalizedSymbol] = {
+        higher: higherHistory,
+        primary: primaryHistory,
+        entry: entryHistory,
+      };
+    }
+
+    return result;
   }
 }

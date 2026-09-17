@@ -1,7 +1,11 @@
 import { CryptoAnalysis } from "@/indicators/types";
 
 import { calculateSignalConfidence } from "./signalConfidence";
-import { CryptoScanResult, ScannerSignal } from "./types";
+import {
+  CryptoScanResult,
+  MultiTimeframeAnalysis,
+  ScannerSignal,
+} from "./types";
 
 const WEIGHTS = {
   SMA: 25,
@@ -12,7 +16,10 @@ const WEIGHTS = {
 
 const VOLUME_BONUS = 10;
 
-export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
+export function scanCryptos(
+  cryptos: CryptoAnalysis[],
+  multiTimeframes: Record<string, MultiTimeframeAnalysis>,
+): CryptoScanResult[] {
   return cryptos.map((crypto) => {
     let score = 0;
 
@@ -74,6 +81,7 @@ export function scanCryptos(cryptos: CryptoAnalysis[]): CryptoScanResult[] {
       signal,
       confidence,
       indicators: crypto.indicators,
+      multiTimeframe: multiTimeframes[crypto.symbol],
     };
   });
 }

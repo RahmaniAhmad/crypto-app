@@ -25,13 +25,11 @@ export default function IndicatorChips({ indicators }: Props) {
                 font-medium
 
                 ${
-                  isVolume
-                    ? "bg-blue-500/20 text-blue-600"
-                    : ind.signal === "BUY"
-                      ? "bg-green-500/20 text-green-600"
-                      : ind.signal === "SELL"
-                        ? "bg-red-500/20 text-red-600"
-                        : "bg-muted text-muted-foreground"
+                  ind.signal === "BUY"
+                    ? "bg-green-500/20 text-green-600"
+                    : ind.signal === "SELL"
+                      ? "bg-red-500/20 text-red-600"
+                      : "bg-muted text-muted-foreground"
                 }
               `}
             >
@@ -41,8 +39,8 @@ export default function IndicatorChips({ indicators }: Props) {
                   ? "BB"
                   : ind.indicator}
 
-              {!isVolume && ind.signal === "BUY" && " ↑"}
-              {!isVolume && ind.signal === "SELL" && " ↓"}
+              {ind.signal === "BUY" && " ↑"}
+              {ind.signal === "SELL" && " ↓"}
             </span>
           );
         })}
