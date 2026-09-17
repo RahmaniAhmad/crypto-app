@@ -1,6 +1,7 @@
 import { CryptoScanResult } from "@/scanner/types";
-import ConfidenceBadge from "./ConfidenceBadge";
+
 import IndicatorChips from "./IndicatorChips";
+import MultiTimeframe from "./MultiTimeframe";
 import SignalBadge from "./SignalBadge";
 import SignalScore from "./SignalScore";
 
@@ -39,10 +40,9 @@ export default function SignalCard({ item, rank }: Props) {
       </div>
 
       <SignalScore score={item.score} />
-      <div className="mt-3">
-        <ConfidenceBadge confidence={item.confidence} />
-      </div>
       <IndicatorChips indicators={item.indicators} />
+
+      {item.multiTimeframe && <MultiTimeframe analysis={item.multiTimeframe} />}
     </div>
   );
 }

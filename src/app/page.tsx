@@ -1,7 +1,7 @@
+import { analyzeMarket } from "@/analysis";
 import CryptoDashboard from "@/components/CryptoDashboard";
 import { TRADING_CONFIG } from "@/config";
 import { isTradingResolution } from "@/utils/tradingResolution";
-import { analyzeMarket } from "@/analysis";
 
 interface Props {
   searchParams: Promise<{

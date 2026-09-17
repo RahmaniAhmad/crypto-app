@@ -3,3 +3,9 @@ export interface MarketHistory {
   close: number[];
   volume: number[];
 }
+
+export interface MultiTimeframeHistory {
+  higher: MarketHistory;
+  primary: MarketHistory;
+  entry: MarketHistory;
+}
