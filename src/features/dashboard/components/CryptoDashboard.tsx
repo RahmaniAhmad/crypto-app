@@ -37,7 +37,7 @@ export default function CryptoDashboard({
 
       <Tabs aria-label="Crypto dashboard" variant="solid">
         <Tab key="scanner" title="Scanner">
-          <Scanner data={scanned} />
+          <Scanner data={scanned} resolution={resolution} />
         </Tab>
 
         <Tab key="analysis" title="Market Analysis">
