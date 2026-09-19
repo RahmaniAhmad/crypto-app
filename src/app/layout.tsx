@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { NextUIProvider } from "@nextui-org/react";
 import { Providers } from "./providers";
-import TopMenu from "@/components/topMenu";
+import AppLayout from "@/layouts/AppLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <TopMenu />
-          {children}
+          <AppLayout>{children}</AppLayout>
         </Providers>
       </body>
     </html>
