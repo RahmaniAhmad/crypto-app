@@ -1,6 +1,7 @@
 import {
   MarketHistory,
   MultiTimeframeHistory,
+  PricePoint,
   TradingResolution,
 } from "@/features/market/types";
 
@@ -15,4 +16,10 @@ export interface MarketProvider {
   getMultiTimeframeHistory(
     symbols: string[],
   ): Promise<Record<string, MultiTimeframeHistory>>;
+
+  getPriceHistory(
+    symbol: string,
+    resolution: TradingResolution,
+    limit?: number,
+  ): Promise<PricePoint[]>;
 }

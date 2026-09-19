@@ -4,6 +4,7 @@ import { BinanceClient } from "./client";
 import {
   MarketHistory,
   MultiTimeframeHistory,
+  PricePoint,
   TradingResolution,
 } from "@/features/market/types";
 import { MarketProvider } from "../../marketProvider";
@@ -115,5 +116,21 @@ export class BinanceMarketProvider implements MarketProvider {
     }
 
     return result;
+  }
+  async getPriceHistory(
+    symbol: string,
+    resolution: TradingResolution,
+    limit = 100,
+  ): Promise<PricePoint[]> {
+    const candles = await this.client.getKlines(
+      `${symbol}USDT`,
+      resolution,
+      limit,
+    );
+
+    return candles.map((candle) => ({
+      time: Number(candle[0]),
+      price: Number(candle[4]),
+    }));
   }
 }

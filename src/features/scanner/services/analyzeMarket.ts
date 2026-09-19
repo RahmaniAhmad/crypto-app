@@ -1,10 +1,12 @@
 import { marketProvider } from "@/features/market";
 import { MARKET_CONFIG } from "@/features/market/config/market";
 import { TradingResolution } from "@/features/market/types";
-import { runAllIndicators } from "@/features/scanner/calculations/runAllIndicators";
 import { MultiTimeframeMap } from "../types";
-import { analyzeMultiTimeframe } from "../calculations/multiTimeframe";
-import { scanCryptos } from "../calculations/cryptoScanner";
+import {
+  analyzeMultiTimeframe,
+  runAllIndicators,
+  scanCryptos,
+} from "../calculations";
 
 export async function analyzeMarket(resolution: TradingResolution) {
   const symbols = await marketProvider.getSymbols(
