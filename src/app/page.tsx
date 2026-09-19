@@ -1,7 +1,7 @@
-import { analyzeMarket } from "@/analysis";
-import CryptoDashboard from "@/components/CryptoDashboard";
-import { TRADING_CONFIG } from "@/config";
-import { isTradingResolution } from "@/utils/tradingResolution";
+import CryptoDashboard from "@/features/dashboard/components/CryptoDashboard";
+import { MARKET_CONFIG } from "@/features/market/config/market";
+import { isTradingResolution } from "@/features/market/helpers";
+import { analyzeMarket } from "@/features/scanner/services/analyzeMarket";
 
 interface Props {
   searchParams: Promise<{
@@ -14,7 +14,7 @@ export default async function Home({ searchParams }: Props) {
 
   const resolution = isTradingResolution(resolutionParam)
     ? resolutionParam
-    : TRADING_CONFIG.resolution;
+    : MARKET_CONFIG.resolution;
 
   const { analysis, scanned } = await analyzeMarket(resolution);
 
