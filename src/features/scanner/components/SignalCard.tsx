@@ -1,4 +1,5 @@
 import { FaChartLine } from "react-icons/fa";
+
 import { CryptoScanResult } from "../types";
 import IndicatorChips from "./IndicatorChips";
 import MultiTimeframe from "./MultiTimeframe";
@@ -40,7 +41,7 @@ export default function SignalCard({ item, rank, onChartClick }: Props) {
             onClick={() => onChartClick(item.symbol)}
             title={`View ${item.symbol} chart`}
           >
-            <FaChartLine size={14} />
+            <FaChartLine size={20} />
           </button>
         </div>
         <SignalBadge signal={item.signal} />
