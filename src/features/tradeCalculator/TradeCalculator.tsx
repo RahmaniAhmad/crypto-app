@@ -7,15 +7,11 @@ export default function TradeCalculator() {
   const calculator = useTradeCalculator();
 
   return (
-    <div className="w-full p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold">Trade Calculator</h2>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Calculate your stop loss, take profit, position size and potential
-          P&amp;L.
-        </p>
-      </div>
+    <div className="w-full px-6 py-4">
+      <p className="mb-6 text-sm text-muted-foreground">
+        Estimate entry levels, position size, risk/reward, and potential P&amp;L
+        based on your trade setup.
+      </p>
 
       <TradeCalculatorForm
         direction={calculator.direction}
